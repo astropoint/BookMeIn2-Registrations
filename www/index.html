@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+		<meta charset="utf-8" /> 
+		<meta name="format-detection" content="telephone=no" />
+		<meta name="msapplication-tap-highlight" content="no" />
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+		<!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+		<meta http-equiv="Content-Security-Policy" content="default-src * 'self' data: gap: https://* 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *">
+				<!-- Adding jQuery -->
+		<script type="text/javascript" src="./js/jquery-2.1.4.js"></script>
+				<!-- Add jQuery mobile -->
+		<link rel="stylesheet" href="./js/jquery.mobile-1.4.5.css" />
+		<script type="text/javascript" src="js/jquery.mobile-1.4.5.js"></script>
+
+		<script type="text/javascript" src="cordova.js"></script>
+		<!-- All js to go in here inside ondeviceready fn -->
+		<script type="text/javascript" src="js/index.js" defer></script>
+		<script src='js/bootstrap.min.js' defer></script>
+				<!--I think this CSS applies to all pages here-->        
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
+		<link rel="stylesheet" href="css/style.css">
+		<title>BookMeIn2</title>
+
+</head>
+
+<body>
+
+	<div data-role="page" class='mypage' id="attendeeLogin">
+		<div data-role="header">	
+			<title>Login Page</title>
+		</div> 
+
+		<div role="main" class="ui-content">
+			<h1 id="delegate_text">BookMeIn2 Login</h1>
+				<form id="login_form"><br> 
+				<input type="text" placeholder="Event Reference" name="event_reference" required><br>
+				<input type="email" placeholder="Username" name="username" required><br>
+				<input type="password" placeholder="Password" name="password" required><br>
+				<a href="#termsAndPrivacy">Terms of use &nbsp; | &nbsp; Privacy </a><br><br>
+				<button type="button" id="log_in_btn">Login</button>
+				<div class='ajaxresponse' id='login_response'></div>
+			</form>
+		</div>
+	</div>
+
+	<div data-role="page" class='mypage' id="termsAndPrivacy">
+		<div data-role="header">	
+			<title>Login Page</title>
+		</div> 
+
+		<div role="main" class="ui-content">
+			<h1>Terms &amp; Conditions</h1>
+			<p>We are storing the details</p>
+							 
+			<h1>Privacy</h1>
+			<p>The app collects the data entered by the user at the conference and this is then sent over to our servers to be used to record the delegate's and attendance.</p>
+			
+			<p></p>
+			<p class='versionnumber'></p>
+			
+			<div class='centeralign'>
+				<button class='goback'>Go Back</button>
+			</div>
+				
+		</div>
+	</div>
+
+	<div data-role="page" class='mypage' id="appHelpPage">
+		<div data-role="header">
+			<title>Help</title>
+		</div>
+
+		<div role="main" class="ui-content">
+
+			<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h1 class="logo center conference_name">  </h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			
+			<div class='pagebody' id='apphelptext'>
+				Some Content
+			</div>
+					 
+		</div>  
+	</div>
+
+	<div data-role="page" class='mypage' id="attendeeHome">
+		<div data-role="header">
+				<title>Home</title>
+				<script id="panel-init">
+						$(function() {
+							$( "body>[data-role='panel']" ).panel();
+						});
+				 </script>
+
+			</div>
+
+			<div role="main" class="ui-content">
+							
+					<!-- banner content-->
+				<div class="banner">
+					<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+					</div>			
+				</div>	
+			<h1 class="logo center conference_name"></h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				<h4>Select Event</h4>
+				<p>Please select a location from the list below</p>
+				<select id="eventselect" class="wide-control">
+				</select>
+				
+				<button onclick="selectEvent()">Register attendees for location</button>
+
+				<button onclick="goToSelectAttendee()" style='display:none' id='gottoselectattendee'>View attendees</button>
+			</div>
+		</div>
+	</div>
+
+	<div data-role="panel" id="leftpanel" data-position="left" data-display="reveal" data-theme="a">
+
+		<a class='menu_link' href="#attendeeHome">Home</a><br>
+		<a class='menu_link' href="#appHelpPage">Help</a><br>
+		<a class='menu_link' href="#delegateIndex" id="close_btn">Logout</a>
+	</div>
+
+</body>
+
+</html>

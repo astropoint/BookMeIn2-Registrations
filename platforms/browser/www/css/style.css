@@ -1,0 +1,167 @@
+/*common styling elements placed at bottom of page*/
+
+body{
+	font-family: sans-serif;}
+a {
+	color:grey;
+	text-decoration:none;	 
+	font-weight: bold;
+	}
+
+
+/*############ Header #########################*/
+#banner {
+	width:100%;
+	border: thin solid pink;
+	overflow: hidden;
+}
+	
+#menu_icon,.menu_icon {
+	float: left;
+	position: relative;
+	cursor:pointer;
+	font-size: 2em;
+	padding: 0 1em 0 1em;
+}
+
+.backbutton{
+	position: absolute;
+	top: 10px;
+	right: 0;
+}
+
+.center {
+	text-align:center;
+}
+
+.pagebody{
+	clear:both;
+}
+
+#leftpanel{
+	max-width: 50%;
+}
+
+.fakedarkbutton{
+	border: 2px solid #000;
+	border-radius: 10px;
+	margin: 0.5em 0 0.5em 0;
+	background-color: #ccc;
+	cursor: pointer;
+	height: auto;
+}
+
+@media only screen and (max-width: 560px) {
+	/* Panel left open animated */
+	.ui-panel-animate.ui-panel-page-content-position-left {
+		left: 0;
+		right: 0;
+		-webkit-transform: translate3d(50%,0,0);
+		-moz-transform: translate3d(50%,0,0);
+		transform: translate3d(50%,0,0);
+	}
+}
+
+#leftpanel img{
+	max-width: 100%;
+}
+
+.ui-panel-page-content-position-left {
+	/*left: -25% !important;*/
+	
+}
+
+/*############ Menu - slide in #########################*/
+#nav {
+	height: 100%;
+    width: 0;
+    position: fixed;	
+	background-color: #455054;
+	overflow-x: hidden;	
+    transition: 0.5s;} 
+
+#nav a {
+	display: block;
+	max-width: 10%;	
+	padding: 0.8em;
+	border-bottom: thin solid #566165;}
+		
+#nav_modal {	/* The Modal (background) according to w3schols*/
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+	width: 0%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    transition: 0.5s;}
+
+	
+	
+
+.fakebutton{
+	background-color: #f6f6f6 /*{a-bup-background-color}*/;
+	border-color: #ddd /*{a-bup-border}*/;
+	color: #333 /*{a-bup-color}*/;
+	text-shadow: 0 /*{a-bup-shadow-x}*/ 1px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
+	border-radius: .3125em;
+}
+
+.fakebutton:hover{
+	background-color: #ddd;
+}
+/*############ Login page #########################*/
+
+#delegate_text {
+	padding-top: 2%;
+	text-align: center;
+}
+
+#login_form {
+	margin: auto;
+	text-align: center;
+}
+
+
+.normallink{
+	color: blue !important;
+	text-decoration: underline !important;
+	cursor: pointer;
+}
+
+
+.ajaxresponse{
+	color: red;
+}
+
+.datetimelocal{
+	background: none;
+}
+
+.ui-input-text{
+	border: 0;
+}
+
+.errormessage{
+	text-align:center;
+	border-radius:5px;
+	background-color: #f8d7da;
+	color: #721c24; 
+}
+
+.successmessage{
+	text-align:center;
+	border-radius:5px;
+	color: #155724;
+	background-color: #d4edda;
+}
+
+.meeting_schedule{
+	font-size: 1.5em;
+}
+
+#otherprofilestatusresponse{
+	display:none;
+}
