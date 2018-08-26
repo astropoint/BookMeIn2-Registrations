@@ -69,6 +69,9 @@
         },
         "cordova-plugin-x-toast": {
             "PACKAGE_NAME": "com.jmdb.bookmein2"
+        },
+        "phonegap-plugin-barcodescanner": {
+            "PACKAGE_NAME": "com.jmdb.bookmein2"
         }
     },
     "dependent_plugins": {

@@ -107,7 +107,6 @@
 			
 			
 			<div class='pagebody' id='apphelptext'>
-				Some Content
 			</div>
 					 
 		</div>  
@@ -136,7 +135,7 @@
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
-				<h4>Select Event</h4>
+				<h4>Select Location</h4>
 				<p>Please select a location from the list below</p>
 				<select id="eventselect" class="wide-control">
 				</select>
@@ -144,6 +143,51 @@
 				<button onclick="selectEvent()">Register attendees for location</button>
 
 				<button onclick="goToSelectAttendee()" style='display:none' id='gottoselectattendee'>View attendees</button>
+			</div>
+		</div>
+	</div>
+	
+	<div data-role="page" class='mypage' id="eventScan">
+		<div data-role="header">
+				<title>Home</title>
+				<script id="panel-init">
+						$(function() {
+							$( "body>[data-role='panel']" ).panel();
+						});
+				 </script>
+
+			</div>
+
+			<div role="main" class="ui-content">
+				<input type='hidden' id='eventscanid' value='' />
+							
+					<!-- banner content-->
+				<div class="banner">
+					<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+					</div>			
+				</div>	
+			<h1 class="logo center conference_name"></h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				<button id="scanbutton" >Scan Barcode</button>
+				<div style="font-weight: bold;font-size:1.2em;">OR</div>
+
+				<div id="selectattendeecontent">
+				<br>
+				<input class="wide-control" type="text" id="attendeesurname" placeholder="Type an attendee's name to search for them">
+				<br>
+				<span id="numresultsbysurnamefound"></span>
+				<div style="display:none" id="surnameselect"></div>
+					<select style="display:none" id="attendeesurnameselect"></select>
+					<button style="display:none" onclick="registerAttendeeBySurname()" id="selectattendeebysurnamebuttonnew">Register attendee</button>
+				</div>
+
+				<div id="scanresponsetext"></div>
+
+				<br><br><br>
+				<button onclick="goToRecentRegList();">View all attendees registered</button>
 			</div>
 		</div>
 	</div>

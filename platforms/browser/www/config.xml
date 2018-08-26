@@ -6,6 +6,9 @@
     <feature name="Device">
         <param name="browser-package" value="Device" />
     </feature>
+    <feature name="BarcodeScanner">
+        <param name="browser-package" value="BarcodeScanner" />
+    </feature>
     <name>BookMeIn2</name>
     <description>
         Register attendees at conferences and events.

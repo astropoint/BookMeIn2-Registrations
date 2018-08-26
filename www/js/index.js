@@ -3,6 +3,7 @@ $(document).ready(function(){
 			document.addEventListener('deviceready', onDeviceReady,false);
 			//onDeviceReady();
 			checkInternet();
+			checkMobile();
 			
 			//check the status of the internet every 10 seconds
 			setInterval(function(){
@@ -41,7 +42,7 @@ var isInternet = true;
 var curconference = -1;
 var curapikey = "";
 var maxUploadSize = 8;
-var apikey;
+var apikey = "";
 
 function checkInternet(){
 	var data = "action=checkconnection"; 
@@ -84,11 +85,98 @@ function checkIfLoggedIn(requirelogin){
 	}
 }
 
+function checkMobile(){
+	data = "action=checkmobile"
+	$.ajax({
+		url: apiURL,
+		data: data,
+		dataType: "json",
+		type: 'post'
+	}).done(function(response){
+		if(response.success){
+			localStorage.setItem('mobile', response.data.mobile);
+			if(!response.data.mobile){
+				$('#scanbutton').css('height', '160px');
+			}
+		}
+	});
+}
+
+function checkEventScan(){
+	var eventid = $('#eventscanid').val();
+	if(eventid=='' || eventid==0){
+		window.location.href = '#attendeeHome';
+	}
+}
+
 $(document).on('click', '#close_btn', function(e){
 	e.preventDefault();
 	resetAllFields();
 	window.location.href='#attendeeLogin';
 });
+
+$(document).on('click', '#scanbutton', function(e){
+	e.preventDefault();
+	var eventid = $('#eventscanid').val();
+	
+	cordova.plugins.barcodeScanner.scan(
+		function (result) {
+			if(!result.cancelled && result.text!=''){
+				registerAttendee(eventid, result.text);
+			}
+		},
+		function (error) {
+			alert("Scanning failed: " + error);
+		},
+		{
+			preferFrontCamera : false, // iOS and Android
+			saveHistory: true, // Android, save scan history (default false)
+			prompt : "Place a barcode inside the scan area", // Android
+			resultDisplayDuration: 500, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+			disableAnimations : true, // iOS
+			disableSuccessBeep: false // iOS and Android
+		}
+	);
+});
+
+function registerAttendee( eventid, barcode){
+	var uuid = $('#uuid').val();
+	var hostaddress = $('#hostaddresshidden').val();
+	
+	$.ajax({
+		type: "POST",
+		data: {
+			"action": "registerattendee",
+			"apikey": apikey,
+			"eventid": eventid,
+			"scandata": barcode
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(!response.success || !response.data.success){
+				alert(response.data.text);
+				$('#scanresponsetext').html(response.data.text);
+			}else{
+				$('#surnameselect').html('');
+				$('#attendeesurname').val('');
+				$('#selectattendeebysurnamebuttonnew').hide();
+				$('#attendeesurnameselect').hide();
+				if(response.data.eventtype==1){
+					//go to save notes page
+					$('#regid').val(response.insertid);
+					$('#loc').val('0');
+					$('#regnotestext').val('');
+					$('#pagename').html("Add notes for " + response.data.name);
+					$('#gotorecentlyregistered').show();
+					//activate_subpage("#regnotes");
+				}else{
+					$('#scanresponsetext').html(response.data.text);
+				}
+			}
+		}
+	});
+}
 
 function showToast(text){
 	console.log(text);
@@ -169,7 +257,6 @@ $(document).on('click',"#log_in_btn",function(e){
 					$('.conference_name').html(response.data.conference_name);
 					$('#apphelptext').html(response.data.apphelptext);
 					
-					alert(parseInt(response.data.security));
 					if(parseInt(response.data.security)>=9){
 						$('#gottoselectattendee').show();
 					}else{
@@ -207,19 +294,37 @@ function populateList(){
 				$('#eventselect').html('');
 				var numlocations = 0;
 				var mainlocid = 0;
+				var output = "";
+				var firstelementid = 0;
 				$.each(response.data.list, function(index, item) {
-					$('#eventselect').append("<option value='"+item.id+"'>"+item.name+"</option>");
+					output += "<option value='"+item.id+"'>"+item.name+"</option>";
+					if(numlocations==0){
+						firstelementid = item.id;
+					}
 					numlocations++;
-					mainlocid = item.id
+					mainlocid = item.id;
+					
 				});
+				
+				$('#eventselect').html(output);
+				$('#eventselect').val(firstelementid);
+				$('#eventselect').trigger('change');
 				if(numlocations==1){
 					//Only one location allowed to send them straight there
-					//$('#eventselect').val(mainlocid);
-					//goToSelectAttendee();
+					$('#eventscanid').val(mainlocid);
+					selectEvent();
 				}
 			}
 		}
 	});
+}
+
+function selectEvent(){
+	var eventid = $('#eventselect').val();
+	
+	$('#eventscanid').val(eventid);
+	
+	window.location.href='#eventScan';
 }
 
 
@@ -243,6 +348,10 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 			break;
 		case "appHelpPage":
 			checkIfLoggedIn(true);
+			break;
+		case "eventScan":
+			checkIfLoggedIn(true);
+			checkEventScan();
 			break;
 		default:
 			console.log("NO PAGE INIT FUNCTION")
