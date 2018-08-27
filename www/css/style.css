@@ -24,6 +24,10 @@ a {
 	padding: 0 1em 0 1em;
 }
 
+.logo{
+	padding-right:93px;
+}
+
 .backbutton{
 	position: absolute;
 	top: 10px;

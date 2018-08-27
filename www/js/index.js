@@ -102,6 +102,109 @@ function checkMobile(){
 	});
 }
 
+$(document).on('change keyup', '#attendeesurname', function(e){
+	e.preventDefault();
+	var nametocheck = $(this).val();
+	if(nametocheck.length>=3){
+		$('#surnameselect').html(spinner);
+		$.ajax({
+			type: "POST",
+			data: {
+				"action": "getnamematches",
+				"apikey": apikey,
+				"name": nametocheck
+			},
+			url: apiURL,
+			dataType: 'json',
+			success: function(response) {
+				if(!response.success){
+					$('#scanresponsetext').html(response.message);
+				}else{
+					$('#attendeesurnameselect').empty();
+					var html = "";         
+					var numfound = parseInt(response.data.total);
+					
+					$.each(response.data.results, function(key, attendee) {
+						html += "<option value='"+attendee.reference+"'>"+attendee.full_name+"</option>";
+					});
+					var response = numfound+" attendee";
+					if(numfound!=1){
+						response += "s";
+					}
+					response += " found";
+					$('#numresultsbysurnamefound').html(numfound+" attendees found");
+					$('#attendeesurnameselect').html(html);
+					$('#attendeesurnameselect').show();
+					$('#attendeesurnameselect').trigger('change');
+					$('#selectattendeebysurnamebuttonnew').show();
+				}
+			}
+		});
+	}else{
+		$('#selectattendeebysurnamebuttonnew').hide();
+		$('#attendeesurnameselect').hide();
+		$('#surnameselect').html('');
+	}
+});
+
+$(document).on('keyup', '#selectattendeesurname', function(e){
+	e.preventDefault();
+	var nametocheck = $(this).val();
+	
+	if(nametocheck.length>=3){
+		$('#surnameselectfromlist').html(spinner);
+		var uuid = $('#uuid').val();
+		var hostaddress = $('#hostaddresshidden').val();
+
+		$.ajax({
+			type: "POST",
+			data: {
+				"action": "getnamematches",
+				"apikey": apikey,
+				"nametocheck": nametocheck
+			},
+			url: "https://"+hostaddress+"/appaccess/getnamematches.php",
+			dataType: 'json',
+			success: function(response) {
+				if(!response.success){
+					$('#scanresponsetext').html("No name sent");
+				}else{
+					$('#attendeesurnameselectlist').empty();
+					var html = "";
+					$.each(response.data.results, function(attendee) {
+						html += "<option value='"+attendee.reference+"'>"+attendee.full_name+"</option>";
+					});
+					$('#attendeesurnameselectlist').html(html);
+					$('#attendeesurnameselectlist').show();
+					$('#attendeesurnameselectlist').trigger('change');
+					$('#gotoselectedattendee').show();
+					$('#surnameselectfromlist').html('');
+				}
+			}
+		});
+	}else{
+		$('#selectattendeebysurnamebuttonnew').hide();
+		$('#surnameselectfromlist').html('');
+		$('#gotoselectedattendee').hide();
+		$('#attendeesurnameselectlist').show();
+	}
+});
+
+function registerAttendeeBySurname(){
+	var eventid = $('#eventscanid').val();
+	var attendeeref = $('#attendeesurnameselect').val();
+	if(typeof attendeeref != 'undefined'){
+		if(attendeeref=='blank'){
+			$('#scanresponsetext').html("No attendees were found, please try again");
+		}else{
+			registerAttendee(eventid,attendeeref); 
+		}
+	}
+	$('#selectattendeebysurnamebuttonnew').hide();
+	$('#attendeesurname').val('');
+	$('#attendeesurnameselect').hide();
+}
+
 function checkEventScan(){
 	var eventid = $('#eventscanid').val();
 	if(eventid=='' || eventid==0){
@@ -155,7 +258,6 @@ function registerAttendee( eventid, barcode){
 		dataType: 'json',
 		success: function(response) {
 			if(!response.success || !response.data.success){
-				alert(response.data.text);
 				$('#scanresponsetext').html(response.data.text);
 			}else{
 				$('#surnameselect').html('');
