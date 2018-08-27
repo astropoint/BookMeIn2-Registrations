@@ -29,9 +29,11 @@ var destinationType;
 function onDeviceReady(){
 		pictureSource=navigator.camera.PictureSourceType;
 		destinationType=navigator.camera.DestinationType;
+		/*
 		cordova.getAppVersion.getVersionNumber(function (version) {
 				$('.versionnumber').html(version);
 		});
+		* */
 }
 
 var siteURL = "https://reg.bookmein2.com";
