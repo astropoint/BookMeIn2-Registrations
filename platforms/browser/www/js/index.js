@@ -27,7 +27,6 @@ var months = ["January", "February", "March", "April", "May", "June", "July", "A
 
 var destinationType;
 function onDeviceReady(){
-		alert("2hi");
 		pictureSource=navigator.camera.PictureSourceType;
 		destinationType=navigator.camera.DestinationType;
 		cordova.getAppVersion.getVersionNumber(function (version) {
