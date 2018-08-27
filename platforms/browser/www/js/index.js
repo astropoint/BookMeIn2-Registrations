@@ -29,11 +29,9 @@ var destinationType;
 function onDeviceReady(){
 		pictureSource=navigator.camera.PictureSourceType;
 		destinationType=navigator.camera.DestinationType;
-		/*
 		cordova.getAppVersion.getVersionNumber(function (version) {
 				$('.versionnumber').html(version);
 		});
-		* */
 }
 
 var siteURL = "https://reg.bookmein2.com";
@@ -257,24 +255,28 @@ $(document).on('click', '#scanbutton', function(e){
 	e.preventDefault();
 	var eventid = $('#eventscanid').val();
 	
-	cordova.plugins.barcodeScanner.scan(
-		function (result) {
-			if(!result.cancelled && result.text!=''){
-				registerAttendee(eventid, result.text);
+	try{
+		cordova.plugins.barcodeScanner.scan(
+			function (result) {
+				if(!result.cancelled && result.text!=''){
+					registerAttendee(eventid, result.text);
+				}
+			},
+			function (error) {
+				alert("Scanning failed: " + error);
+			},
+			{
+				preferFrontCamera : false, // iOS and Android
+				saveHistory: true, // Android, save scan history (default false)
+				prompt : "Place a barcode inside the scan area", // Android
+				resultDisplayDuration: 500, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
+				disableAnimations : true, // iOS
+				disableSuccessBeep: false // iOS and Android
 			}
-		},
-		function (error) {
-			alert("Scanning failed: " + error);
-		},
-		{
-			preferFrontCamera : false, // iOS and Android
-			saveHistory: true, // Android, save scan history (default false)
-			prompt : "Place a barcode inside the scan area", // Android
-			resultDisplayDuration: 500, // Android, display scanned text for X ms. 0 suppresses it entirely, default 1500
-			disableAnimations : true, // iOS
-			disableSuccessBeep: false // iOS and Android
-		}
-	);
+		);
+	}catch(error){
+		alert(error);
+	}
 });
 
 function saveNotes(){
