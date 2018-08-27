@@ -75,10 +75,7 @@ function checkIfLoggedIn(requirelogin){
 		window.location.href='#attendeeLogin';
 	}else if(!requirelogin && loggedIn=='1'){
 		
-		$('.conference_name').html(localStorage.getItem('conference_name'));
-		$('#apphelptext').html(localStorage.getItem('apphelptext'));
-		
-		apikey = localStorage.getItem('apikey');
+		afterLoginCheck();
 		
 		window.location.href='#attendeeHome';
 		
@@ -156,41 +153,46 @@ $(document).on('keyup', '#selectattendeesurname', function(e){
 	
 	if(nametocheck.length>=3){
 		$('#surnameselectfromlist').html(spinner);
-		var uuid = $('#uuid').val();
-		var hostaddress = $('#hostaddresshidden').val();
 
 		$.ajax({
 			type: "POST",
 			data: {
 				"action": "getnamematches",
 				"apikey": apikey,
-				"nametocheck": nametocheck
+				"name": nametocheck
 			},
-			url: "https://"+hostaddress+"/appaccess/getnamematches.php",
+			url: apiURL,
 			dataType: 'json',
 			success: function(response) {
 				if(!response.success){
-					$('#scanresponsetext').html("No name sent");
+					$('#selectattendeeresponse').html(response.message);
 				}else{
 					$('#attendeesurnameselectlist').empty();
 					var html = "";
-					$.each(response.data.results, function(attendee) {
+					$.each(response.data.results, function(index, attendee) {
 						html += "<option value='"+attendee.reference+"'>"+attendee.full_name+"</option>";
 					});
 					$('#attendeesurnameselectlist').html(html);
-					$('#attendeesurnameselectlist').show();
 					$('#attendeesurnameselectlist').trigger('change');
+					$('#attendeesurnamelistselectdiv').show();
 					$('#gotoselectedattendee').show();
-					$('#surnameselectfromlist').html('');
 				}
 			}
 		});
 	}else{
 		$('#selectattendeebysurnamebuttonnew').hide();
 		$('#surnameselectfromlist').html('');
+		$('#attendeesurnamelistselectdiv').hide();
 		$('#gotoselectedattendee').hide();
-		$('#attendeesurnameselectlist').show();
 	}
+});
+
+$(document).on("click", "#gotoselectedattendee", function(e){
+	e.preventDefault();
+	var attendeereference = $('#attendeesurnameselectlist').val();
+	$('#surnameselectfromlist').hide();
+	$('#viewattendeereference').val(attendeereference);
+	goToViewAttendee(attendeereference);
 });
 
 function registerAttendeeBySurname(){
@@ -225,6 +227,20 @@ function checkRegNotes(){
 function checkAllNotes(){
 	var regid = $('#eventregid').val();
 	if(regid=='' || regid==0){
+		window.location.href = '#attendeeHome';
+	}
+}
+
+function checkIfAdmin(){
+	//needs to be admin to be on this page
+	if(parseInt(localStorage.getItem('security'))<9){
+		window.location.href = '#attendeeHome';
+	}
+}
+
+function checkViewAttendee(){
+	var attendeeref = $('#viewattendeereference').val();
+	if(attendeeref=='' || attendeeref==0){
 		window.location.href = '#attendeeHome';
 	}
 }
@@ -427,14 +443,7 @@ $(document).on('click',"#log_in_btn",function(e){
 					localStorage.setItem("apphelptext", response.data.apphelptext);
 					localStorage.setItem("security", parseInt(response.data.security));
 					
-					$('.conference_name').html(response.data.conference_name);
-					$('#apphelptext').html(response.data.apphelptext);
 					
-					if(parseInt(response.data.security)>=9){
-						$('#gottoselectattendee').show();
-					}else{
-						$('#gottoselectattendee').hide();
-					}
 					
 					window.location.href = "#attendeeHome";
 				}else{
@@ -450,6 +459,20 @@ $(document).on('click',"#log_in_btn",function(e){
 		$('#login_response').html(errorstring);
 	}
 });
+
+function afterLoginCheck(){
+	
+	$('.conference_name').html(localStorage.getItem('conference_name'));
+	$('#apphelptext').html(localStorage.getItem('apphelptext'));
+		
+	apikey = localStorage.getItem('apikey');
+		
+	if(parseInt(localStorage.getItem('security'))>=9){
+		$('#gottoselectattendee').show();
+	}else{
+		$('#gottoselectattendee').hide();
+	}
+}
 
 function populateList(){
 
@@ -630,6 +653,92 @@ function goToSaveNotes(noteid){
 	});	
 }
 
+function goToViewAttendee(attendeeref){   
+
+	$.ajax({
+		type: "POST",
+		data: {
+				"action": "getattendeedetails",
+				"apikey": apikey,
+				"attendeeref": attendeeref
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(!response.success){
+				$('#viewattendeeresponse').html(response.message);
+			}else{
+				if(!response.data.success){
+					$('#viewattendeeresponse').html(response.data.message);
+				}else{
+					$('#returntoselectattendeelist').show();
+					var html = "Details for "+response.data.attendee_details.first_name+" "+response.data.attendee_details.last_name;
+					window.location.href = '#viewAttendee';
+					$('#attendee_dets_first_name').html(response.data.attendee_details.first_name);
+					$('#attendee_dets_last_name').html(response.data.attendee_details.last_name);
+					$('#attendee_dets_attendee_type').html(response.data.attendee_details.attendee_type);
+					$('#attendee_dets_reference').html(response.data.attendee_details.reference);
+					var job_title = response.data.attendee_details.job_title;
+					if(typeof(job_title)===null || typeof(job_title)==null|| job_title==null || job_title==''|| job_title=="null"|| job_title=='null'){
+						$('#viewattendeejobtitlerow').hide();
+					}else{
+						$('#viewattendeejobtitlerow').show();
+						$('#attendee_dets_job_title').html(response.data.attendee_details.job_title);
+					}
+					var organisation = response.data.attendee_details.organisation;
+					if(typeof(organisation)===null || typeof(organisation)==null|| organisation==null || organisation==''|| organisation=="null"|| organisation=='null'){
+						$('#viewattendeeorgrow').hide();
+					}else{
+						$('#viewattendeeorgrow').show();
+						$('#attendee_dets_organisation').html(response.data.attendee_details.organisation);
+					}
+					$('#attendee_dets_notes').html("Notes: "+response.data.attendee_details.notes);
+								
+					html += "<h4>Registrations</h4>";
+					if(response.data.attendee_details.registrations.length>0){
+						html += "<h5>Attended locations/session</h5>";
+						html += "<table id='registeredtable' class='backwhite tablesorter'><thead><tr><th>Location</th><th>Time Registered</th><th>Registered by</th><th>Notes</th><th>Lead Status</th></tr></thead><tbody>\n";
+						$.each(response.data.attendee_details.registrations, function(index, item) {
+							if(item.time_registered!==null){
+								html += "<tr>";
+								html += "<td><br />"+item.event_name;
+								html += "<br />Type: "+item.event_type;
+								html += "</td>";
+								html += "<td><br />"+item.time_registered+"</td>";
+								html += "<td><br />"+item.registered_by+"</td>";
+								html += "<td><br />";
+								if(item.notes!==null){
+									html += item.notes;
+								}
+								html += "</td>";
+								html += "<td><br />"+item.lead_quality+"</td>";
+								html += "</tr>\n";
+							}
+						});
+						html += "</tbody></table>\n";
+									
+						html += "<h5>Preregistered for, not yet attended</h5>";
+						html += "<table id='unregisteredtable' class='backwhite tablesorter'><thead><tr><th>Location</th></tr></thead><tbody>\n";
+						$.each(response.data.attendee_details.registrations, function(index, item) {
+							if(item.time_registered===null){
+								html += "<tr>";
+								html += "<td><br />"+item.event_name;
+								html += "<br />Type: "+item.event_type;
+								html += "</td>";
+								html += "</tr>\n";
+							}
+						});
+						html += "</tbody></table>\n";
+					}else{
+						html += response.data.attendee_details.first_name+" "+response.data.attendee_details.last_name+" is not registered for any locations";
+					}
+					$('#attendeeregistrations').html(html);
+				}
+			}
+		}
+	});
+}
+
 function goToRecentRegList(){
 	var eventid = $('#eventselect').val();
 	getRecentlyRegistered(eventid, 0);
@@ -639,6 +748,11 @@ function goToRecentRegList(){
 	$('#eventregid').val(eventid);
 	
 	window.location.href='#eventRegs';
+}
+
+function goToSelectAttendee(){
+	
+	window.location.href='#selectAttendee';
 }
 
 function dateWithoutSeconds(date){
@@ -673,6 +787,15 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 		case "eventRegs":
 			checkIfLoggedIn(true);
 			checkAllNotes();
+			break;
+		case "selectAttendee":
+			checkIfLoggedIn(true);
+			checkIfAdmin();
+			break;
+		case "viewAttendee":
+			checkIfLoggedIn(true);
+			checkIfAdmin();
+			checkViewAttendee();
 			break;
 		default:
 			console.log("NO PAGE INIT FUNCTION")

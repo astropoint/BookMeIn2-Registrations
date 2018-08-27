@@ -135,7 +135,6 @@
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
-				<h4>Select Location</h4>
 				<p>Please select a location from the list below</p>
 				<select id="eventselect" class="wide-control">
 				</select>
@@ -262,6 +261,112 @@
 				<div id="recentregistrations"></div>
 				<input type="hidden" value="datedown" id="sorttype">
 				<input type="hidden" value="0" id="preregistered">
+				
+			</div>
+		</div>
+	</div>
+	
+	<div data-role="page" class='mypage' id="selectAttendee">
+		<input type="hidden" id="eventregid">
+		<div data-role="header">
+			<title>Select Attendee</title>
+			<script id="panel-init">
+					$(function() {
+						$( "body>[data-role='panel']" ).panel();
+					});
+			</script>
+
+		</div>
+
+		<div role="main" class="ui-content">
+				<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h1 class="logo center conference_name"></h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				Search for an attendee by name, organisation or reference
+				<br>
+				<input class="wide-control" type="text" id="selectattendeesurname">
+				<div style="display:none" id="surnameselectfromlist"></div>
+				<div id='attendeesurnamelistselectdiv' style='display:none'><select id="attendeesurnameselectlist"></select></div>
+				<button style="display:none" id="gotoselectedattendee" >View Attendee</button>
+				<div id='selectattendeeresponse'></div>
+			</div>
+		</div>
+	</div>
+	
+	<div data-role="page" class='mypage' id="viewAttendee">
+		<input type="hidden" id="eventregid">
+		<div data-role="header">
+			<title>View Attendee</title>
+			<script id="panel-init">
+					$(function() {
+						$( "body>[data-role='panel']" ).panel();
+					});
+			</script>
+
+		</div>
+
+		<div role="main" class="ui-content">
+				<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h1 class="logo center conference_name"></h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				
+				<input type="hidden" value="" id="attendee_id">
+				
+				<div class='row'>
+					<div class='col-12'>
+						<h3><span id="attendee_dets_first_name"> </span>  <span id="attendee_dets_last_name"> </span></h3>
+					</div>
+				</div>
+				
+				<div class='row'>
+					<div class='col-12'>
+						<span id="attendee_dets_reference"> </span>
+					</div>
+				</div>
+					
+				<div class='row'>
+					<div class='col-12'>
+						<span id="attendee_dets_attendee_type"> </span>
+					</div>
+				</div>
+					
+				<div class='row' id='viewattendeeorgrow'>
+					<div class='col-12'>
+						<span id="attendee_dets_organisation"> </span>
+					</div>
+				</div>
+					
+				<div class='row' id='viewattendeejobtitlerow'>
+					<div class='col-12'>
+						<span id="attendee_dets_job_title"> </span>
+					</div>
+				</div>
+					
+				<div class='row'>
+					<div class='col-12'>
+						<div id="attendee_dets_notes"></div>
+					</div>
+				</div>
+					
+				
+				<div id="attendeeregistrations"><strong>Registrations:</strong>
+				</div>
+				
+				<button class='goback'>Go back to attendee list</button>
 				
 			</div>
 		</div>

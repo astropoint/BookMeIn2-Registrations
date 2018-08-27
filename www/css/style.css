@@ -226,3 +226,29 @@ a {
 	background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAACMtMP///yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);
 	border-bottom: #000 2px solid;
 }
+
+/* Generically sets all tables with this class ot have a white background to stand out against the grey background of the pages */
+table.backwhite {
+	background-color:white;
+	border-collapse: collapse;
+}
+table.backwhite td, table.backwhite th{
+	padding: 5px;
+	border: solid grey 1px;
+    color: black;
+}
+table.backwhite td{
+	border-left: solid black 1px;
+	border-right: solid black 1px;
+    color: black;
+    padding: 5px;
+}
+table.backwhite th{
+	border: solid black 1px;
+}
+table.backwhite tr:last-child td{ 
+	border-bottom: solid black 1px;
+}
+td.aligncenter{
+	align:center;
+}
