@@ -119,7 +119,7 @@ $(document).on('change keyup', '#attendeesurname', function(e){
 				if(!response.success){
 					$('#scanresponsetext').html(response.message);
 				}else{
-					$('#attendeesurnameselect').empty();
+					$('#attendeesurnameselect').html('');
 					var html = "";         
 					var numfound = parseInt(response.data.total);
 					
@@ -133,8 +133,8 @@ $(document).on('change keyup', '#attendeesurname', function(e){
 					response += " found";
 					$('#numresultsbysurnamefound').html(numfound+" attendees found");
 					$('#attendeesurnameselect').html(html);
-					$('#surnameselectdiv').show();
 					$('#attendeesurnameselect').trigger('change');
+					$('#surnameselectdiv').show();
 					$('#selectattendeebysurnamebuttonnew').show();
 				}
 				$('#surnameselect').html('');
@@ -207,7 +207,8 @@ function registerAttendeeBySurname(){
 	}
 	$('#selectattendeebysurnamebuttonnew').hide();
 	$('#attendeesurname').val('');
-	$('#attendeesurnameselect').hide();
+	$('#attendeesurnameselect').empty();
+	$('#surnameselectdiv').hide();
 }
 
 function checkEventScan(){
