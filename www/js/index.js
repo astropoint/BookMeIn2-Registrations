@@ -277,8 +277,6 @@ $(document).on('click', '#scanbutton', function(e){
 });
 
 function saveNotes(){
-	var uuid = $('#uuid').val();
-	var hostaddress = $('#hostaddresshidden').val();
 	
 	var regid = $('#regid').val();
 	var regnotes = $('#regnotestext').val();
@@ -311,7 +309,6 @@ function saveNotes(){
 				$('#gotorecentlyregistered').hide();
 				if(loc=='0'){
 					$('#regnotes').val('');
-					$('#pagename').html($('#eventname').val());
 					$('#scanresponsetext').html(response.text);
 					window.location.href = '#eventScan';
 					$('#selectattendeebysurnamebuttonnew').hide();
@@ -583,7 +580,7 @@ function getRecentlyRegistered(eventid, preregistered){
 					if(preregistered=='0'){
 						html += "<td><br />"+registration.time+"</td>";
 					}
-					html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+registration.id+")'>Notes</button></td>";
+					html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+registration.id+", "+eventid+", 1)'>Notes</button></td>";
 					html += "</tr>\n";
 				});
 				html += "</tbody></table>";
@@ -620,10 +617,10 @@ function resortName(){
 	getRecentlyRegistered(-1, 0);
 }
 
-function goToSaveNotes(noteid){
+function goToSaveNotes(noteid, eventid, loc){
 	
 	$('#regid').val(noteid);
-	$('#loc').val(1);
+	$('#loc').val(loc);
 	
 	$.ajax({
 		type: "POST",
