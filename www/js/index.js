@@ -1,24 +1,20 @@
 $(document).ready(function(){
-			//This will need to be removed when it's uploaded to phone...
-			document.addEventListener('deviceready', onDeviceReady,false);
-			//onDeviceReady();
-			checkInternet();
-			checkMobile();
-			
-			//check the status of the internet every 10 seconds
-			setInterval(function(){
-				checkInternet();
-				
-				
-				refreshcount++;
-			}, 10000);
-			
-			setTimeout(checkIfLoggedIn, 20);
-			/*
-			cordova.getAppVersion.getVersionNumber(function (version) {
-				$('.versionnumber').html('v'+version);
-			});
-			* */
+	//This will need to be removed when it's uploaded to phone...
+	document.addEventListener('deviceready', onDeviceReady,false);
+	//onDeviceReady();
+	checkInternet();
+	checkMobile();
+	
+	//check the status of the internet every 10 seconds
+	setInterval(function(){
+		checkInternet();
+		
+		
+		refreshcount++;
+	}, 10000);
+	
+	setTimeout(checkIfLoggedIn, 20);
+	
 });
 
 var refreshcount = 0;
@@ -31,9 +27,12 @@ var months = ["January", "February", "March", "April", "May", "June", "July", "A
 
 var destinationType;
 function onDeviceReady(){
-	
+		alert("2hi");
 		pictureSource=navigator.camera.PictureSourceType;
 		destinationType=navigator.camera.DestinationType;
+		cordova.getAppVersion.getVersionNumber(function (version) {
+				$('.versionnumber').html(version);
+		});
 }
 
 var siteURL = "https://reg.bookmein2.com";
