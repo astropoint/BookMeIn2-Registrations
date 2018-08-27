@@ -171,6 +171,7 @@
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
+				<h3 id='event_name'></h3>
 				<button id="scanbutton" >Scan Barcode</button>
 				<div style="font-weight: bold;font-size:1.2em;">OR</div>
 
@@ -179,8 +180,8 @@
 				<input class="wide-control" type="text" id="attendeesurname" placeholder="Type an attendee's name to search for them">
 				<br>
 				<span id="numresultsbysurnamefound"></span>
-				<div style="display:none" id="surnameselect"></div>
-					<select style="display:none" id="attendeesurnameselect"></select>
+				<div id="surnameselect" style='width:10px;height:10px;'></div>
+					<div id='surnameselectdiv'><select style="display:none" id="attendeesurnameselect"></select></div>
 					<button style="display:none" onclick="registerAttendeeBySurname()" id="selectattendeebysurnamebuttonnew">Register attendee</button>
 				</div>
 
@@ -188,6 +189,49 @@
 
 				<br><br><br>
 				<button onclick="goToRecentRegList();">View all attendees registered</button>
+			</div>
+		</div>
+	</div>
+	
+	<div data-role="page" class='mypage' id="regNotes">
+		<div data-role="header">
+				<title>Registration Notes</title>
+				<script id="panel-init">
+						$(function() {
+							$( "body>[data-role='panel']" ).panel();
+						});
+				 </script>
+
+			</div>
+
+			<div role="main" class="ui-content">
+					<!-- banner content-->
+				<div class="banner">
+					<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+					</div>			
+				</div>	
+			<h1 class="logo center conference_name"></h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				<input type="hidden" id="regid">
+				<input type="hidden" id="loc" value="1">
+
+				<button onclick="saveNotes();">Save</button>
+				<br><textarea class="wide-control" id="regnotestext" placeholder="Type some notes" rows="10" wrap="soft"></textarea>
+				<br><div id="leadqualitydiv">Lead Quality:
+				<br>
+				<input class='radionmargin' type="radio" checked="checked" name="quality" id="qual0" value="0">
+				<label for="qual0">&nbsp;N/A</label>
+				<input class='radionmargin' type="radio" name="quality" id="qual1" value="1">
+				<label for="qual1">&nbsp;Low</label>
+				<input class='radionmargin' type="radio" name="quality" id="qual2" value="2">
+				<label for="qual2">&nbsp;Medium</label>
+				<input class='radionmargin' type="radio" name="quality" id="qual3" value="3">
+				<label for="qual3">&nbsp;High</label>
+				
+				<div id='regnotesresponse'></div>
 			</div>
 		</div>
 	</div>
