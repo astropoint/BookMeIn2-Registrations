@@ -21,11 +21,11 @@ a {
 	position: relative;
 	cursor:pointer;
 	font-size: 2em;
-	padding: 0 1em 0 1em;
+	padding: 0 0px 0 0px;
 }
 
 .logo{
-	padding-right:93px;
+	padding-right:40px;
 }
 
 .tablesorter{

@@ -73,6 +73,7 @@ function checkIfLoggedIn(requirelogin){
 	
 	if(requirelogin && loggedIn!='1'){
 		window.location.href='#attendeeLogin';
+		
 	}else if(!requirelogin && loggedIn=='1'){
 		
 		afterLoginCheck();
@@ -439,7 +440,7 @@ $(document).on('click',"#log_in_btn",function(e){
 					localStorage.setItem("apphelptext", response.data.apphelptext);
 					localStorage.setItem("security", parseInt(response.data.security));
 					
-					
+					afterLoginCheck();
 					
 					window.location.href = "#attendeeHome";
 				}else{
