@@ -102,39 +102,24 @@ a {
 }
 
 /*############ Menu - slide in #########################*/
-#nav {
-	height: 100%;
-    width: 0;
-    position: fixed;	
-	background-color: #455054;
-	overflow-x: hidden;	
-    transition: 0.5s;} 
-
-#nav a {
+#leftpanel a {
+	padding: 8px 8px 8px 8px;
+	text-decoration: none;
+	font-size: 25px;
+	color: #818181;
 	display: block;
-	max-width: 10%;	
-	padding: 0.8em;
-	border-bottom: thin solid #566165;}
-		
-#nav_modal {	/* The Modal (background) according to w3schols*/
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
-    left: 0;
-    top: 0;
-	width: 0%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    transition: 0.5s;}
+	transition: 0.3s;
+}
 
-	
-	
+.fa-menu-item{
+	width: 24px;
+	display: inline-block;
+	text-align:center;
+}
 
 .fakebutton{
 	background-color: #f6f6f6 /*{a-bup-background-color}*/;
 	border-color: #ddd /*{a-bup-border}*/;
-	color: #333 /*{a-bup-color}*/;
 	text-shadow: 0 /*{a-bup-shadow-x}*/ 1px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
 	border-radius: .3125em;
 }

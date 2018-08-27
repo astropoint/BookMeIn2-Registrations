@@ -1,25 +1,4 @@
-
 <!DOCTYPE html>
-<!--
-    Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
-
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
 
 <head>
@@ -107,6 +86,33 @@
 			
 			
 			<div class='pagebody' id='apphelptext'>
+			</div>
+					 
+		</div>  
+	</div>
+
+	<div data-role="page" class='mypage' id="aboutPage">
+		<div data-role="header">
+			<title>About</title>
+		</div>
+
+		<div role="main" class="ui-content">
+
+			<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h1 class="logo center conference_name">  </h1>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			
+			<div class='pagebody'>
+				<h4>BookMeIn2</h4>
+				<p>Website: <a href='https://www.bookmein2.com'>https://www.bookmein2.com</a></p>
+				<p>Support Email: <a href='mailto:support@bookmein2.com'>support@ookmein2.com</a></p>
+				<p>App Version: <span class='versionnumber'></span></p>
 			</div>
 					 
 		</div>  
@@ -374,9 +380,10 @@
 
 	<div data-role="panel" id="leftpanel" data-position="left" data-display="reveal" data-theme="a">
 
-		<a class='menu_link' href="#attendeeHome">Home</a><br>
-		<a class='menu_link' href="#appHelpPage">Help</a><br>
-		<a class='menu_link' href="#delegateIndex" id="close_btn">Logout</a>
+		<a class='menu_link' href="#attendeeHome"><span class='fa-menu-item'><i class="fa fa-home fa-menu"></i></span> Home</a><br>
+		<a class='menu_link' href="#appHelpPage"><span class='fa-menu-item'><i class="fa fa-question-circle" aria-hidden="true"></span></i> Help</a><br>
+		<a class='menu_link' href="#aboutPage"><span class='fa-menu-item'><i class="fa fa-info" aria-hidden="true"></i></span> About</a><br>
+		<a class='menu_link' href="#delegateIndex" id="close_btn"><span class='fa-menu-item'><i class="fa fa-sign-out" aria-hidden="true"></i></span> Logout</a>
 	</div>
 
 </body>
