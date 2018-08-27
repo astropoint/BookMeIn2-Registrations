@@ -222,6 +222,13 @@ function checkRegNotes(){
 	}
 }
 
+function checkAllNotes(){
+	var regid = $('#eventregid').val();
+	if(regid=='' || regid==0){
+		window.location.href = '#attendeeHome';
+	}
+}
+
 $(document).on('click', '#close_btn', function(e){
 	e.preventDefault();
 	resetAllFields();
@@ -297,9 +304,9 @@ function saveNotes(){
 					$('#attendeesurnameselect').trigger('change');
 					$('#numresultsbysurnamefound').html('');
 				}else if(loc=='1'){
-					//getRecentlyRegistered(0);
+					getRecentlyRegistered(-1, 0);
 					$('#gotoscanbarcodes').show();
-					//activate_subpage("#recentregs");
+					window.location.href='#eventRegs';
 				}
 			}
 		}
@@ -496,6 +503,143 @@ function selectEvent(){
 	window.location.href='#eventScan';
 }
 
+function getRecentlyRegistered(eventid, preregistered){
+	var uuid = $('#uuid').val();
+	var sorttype = $('#sorttype').val();
+	var security = localStorage.getItem('security');
+	if(eventid==-1){
+		eventid = $('#eventregid').val();
+	}
+	
+	$.ajax({
+		type: "POST",
+		data: {
+			"action": "getrecentregistrations",
+			"apikey": apikey,
+			"eventid": eventid,
+			"sorttype": sorttype,
+			"preregistered": preregistered,
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(!response.success){
+				$('#recentregistrations').html(response.message);
+			}else{
+				var html = "<h3>Attendees registered for " + $('#event_name').val() + "</h3>";
+				html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
+				html += "<thead><tr>";
+				html += "<th onclick='resortName();' class='tablesorterheader";
+				if(sorttype=='nameup'){
+					html += " headerSortUp";
+				}else if(sorttype=='namedown'){
+					html += " headerSortDown";
+				}
+				html += "'>Name</th>";
+										
+				if(preregistered=='0'){
+					html += "<th style='padding-right: 30px;' onclick='resortDate();' class='tablesorterheader";
+					if(sorttype=='dateup'){
+						html += " headerSortUp";
+					}else if(sorttype=='datedown'){
+						html += " headerSortDown";
+					}
+					html += "'>Time<br />registered</th>";  
+				}
+				html += "<th>&nbsp</th></tr></thead>";
+				html += "<tbody>\n";
+				$.each(response.data.registrations, function(index, registration) {
+					html += "<tr>";
+					html += "<td><br />";
+					if(eventid=='1' && security=='9'){
+							//html += "<a href='#' id='gotoattendee_"+item[itemid].attendeeid+"' class='gotoattendeelink'>";
+					}
+					html += registration.name
+					html += "</td>";
+					if(preregistered=='0'){
+						html += "<td><br />"+registration.time+"</td>";
+					}
+					html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+registration.id+")'>Notes</button></td>";
+					html += "</tr>\n";
+				});
+				html += "</tbody></table>";
+				$('#recentregistrations').html(html);
+			}
+		}
+	});
+	
+}
+
+function resortDate(){
+	var sorttype = $('#sorttype').val();
+	if(sorttype=='datedown'){
+		sorttype = 'dateup';
+	}else if(sorttype=='dateup'){
+		sorttype = 'datedown';
+	}else{
+		sorttype = 'datedown';
+	}
+	$('#sorttype').val(sorttype);
+	getRecentlyRegistered(-1, 0);
+}
+
+function resortName(){
+	var sorttype = $('#sorttype').val();
+	if(sorttype=='namedown'){
+		sorttype = 'nameup';
+	}else if(sorttype=='nameup'){
+		sorttype = 'namedown';
+	}else{
+		sorttype = 'namedown';
+	}
+	$('#sorttype').val(sorttype);
+	getRecentlyRegistered(-1, 0);
+}
+
+function goToSaveNotes(noteid){
+	
+	$('#regid').val(noteid);
+	$('#loc').val(1);
+	
+	$.ajax({
+		type: "POST",
+		data: {
+			"action": "getnotesforlocation",
+			"apikey": apikey,
+			"regid": noteid
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(!response.success){
+				$('#regnotesresponse').html(response.message);
+			}else{				
+				
+				$('#gotoscanbarcodes').hide();
+				$('#regnotestext').val(response.data.notes);
+				$('#qual'+response.data.lead_quality).prop('checked', true);
+				$('#gotorecentlyregistered').show();
+				
+				
+				window.location.href = '#regNotes'; 
+				
+				$("input[name='quality']").checkboxradio();
+				$("input[name='quality']").checkboxradio("refresh"); //otherwise the radio button doesn't update with the actual selected value
+			}
+		}
+	});	
+}
+
+function goToRecentRegList(){
+	var eventid = $('#eventselect').val();
+	getRecentlyRegistered(eventid, 0);
+	
+	$('#eventscanid').val(eventid);
+	$('#event_name').html($("#eventselect option:selected").text());
+	$('#eventregid').val(eventid);
+	
+	window.location.href='#eventRegs';
+}
 
 function dateWithoutSeconds(date){
 	return date.substring(0, date.length - 3);
@@ -525,6 +669,10 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 		case "regNotes":
 			checkIfLoggedIn(true);
 			checkRegNotes();
+			break;
+		case "eventRegs":
+			checkIfLoggedIn(true);
+			checkAllNotes();
 			break;
 		default:
 			console.log("NO PAGE INIT FUNCTION")
