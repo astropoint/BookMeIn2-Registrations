@@ -366,8 +366,6 @@ function registerAttendee( eventid, barcode){
 }
 
 function showToast(text){
-	console.log(text);
-	//alert(text);
 	window.plugins.toast.show(text);
 }
 
