@@ -5,6 +5,12 @@ $(document).ready(function(){
 	checkInternet();
 	checkMobile();
 	
+	numattendees = localStorage.getItem("numattendees");
+	if(numattendees===null){
+		numattendees = 0;
+		localStorage.setItem("numattendees", 0);
+	}
+	
 	//check the status of the internet every 10 seconds
 	setInterval(function(){
 		checkInternet();
@@ -41,6 +47,8 @@ var curconference = -1;
 var curapikey = "";
 var maxUploadSize = 8;
 var apikey = "";
+var numlocations = 0;
+var numattendees = 0;
 
 function checkInternet(){
 	var data = "action=checkconnection"; 
@@ -54,12 +62,18 @@ function checkInternet(){
 			error: function(){
 					// will fire when timeout is reached
 					isInternet = false;
+					$('#selectattendeecontent').hide();
+					$('#selectattendeecontentnotavailable').show();
 			},
 			success: function(response){
 				if(response.success){
 					isInternet = true;
+					$('#selectattendeecontent').show();
+					$('#selectattendeecontentnotavailable').hide();
 				}else{
 					isInternet = false;
+					$('#selectattendeecontent').hide();
+					$('#selectattendeecontentnotavailable').show();
 				}
 			},
 			timeout: 3000 // sets timeout to 3 seconds
@@ -196,12 +210,13 @@ $(document).on("click", "#gotoselectedattendee", function(e){
 
 function registerAttendeeBySurname(){
 	var eventid = $('#eventscanid').val();
+	var type = $('#eventscantype').val();
 	var attendeeref = $('#attendeesurnameselect').val();
 	if(typeof attendeeref != 'undefined'){
 		if(attendeeref=='blank'){
 			$('#scanresponsetext').html("No attendees were found, please try again");
 		}else{
-			registerAttendee(eventid,attendeeref); 
+			registerAttendee(eventid,attendeeref, type); 
 		}
 	}
 	$('#selectattendeebysurnamebuttonnew').hide();
@@ -219,8 +234,36 @@ function checkEventScan(){
 
 function checkRegNotes(){
 	var regid = $('#regid').val();
-	if(regid=='' || regid==0){
+	
+	if(regid==''){
 		window.location.href = '#attendeeHome';
+	}else{
+		var notes = localStorage.getItem("attendee-"+regid+"-notes");
+		var quality = localStorage.getItem("attendee-"+regid+"-quality");
+		if(quality!==null){
+			$('#qual0').prop('checked', false);
+			$('#qual1').prop('checked', false);
+			$('#qual2').prop('checked', false);
+			$('#qual3').prop('checked', false);
+			
+				if(quality=='1'){
+					$('#qual1').prop("checked", true);
+				}else if(quality=='2'){
+					$('#qual2').prop("checked", true);
+					console.log($('#qual2').parent().html());
+				}else if(quality=='3'){
+					$('#qual3').prop("checked", true);
+				}else{
+					$('#qual0').prop("checked", true);
+				}
+				
+		}else{
+			$('#qual0').prop("checked", true);
+		}
+		$("input[type='radio']").checkboxradio("refresh");
+		if(notes!==null){
+			$('#regnotestext').val(notes);
+		}
 	}
 }
 
@@ -254,12 +297,13 @@ $(document).on('click', '#close_btn', function(e){
 $(document).on('click', '#scanbutton', function(e){
 	e.preventDefault();
 	var eventid = $('#eventscanid').val();
+	var type = $('#eventscantype').val();
 	
 	try{
 		cordova.plugins.barcodeScanner.scan(
 			function (result) {
 				if(!result.cancelled && result.text!=''){
-					registerAttendee(eventid, result.text);
+					registerAttendee(eventid, result.text, type);
 				}
 			},
 			function (error) {
@@ -284,8 +328,8 @@ function saveNotes(){
 	var regid = $('#regid').val();
 	var regnotes = $('#regnotestext').val();
 	var quality = 0;
-		if($('#qual1').prop('checked')){
-			quality = 1;
+	if($('#qual1').prop('checked')){
+		quality = 1;
 	}else if($('#qual2').prop('checked')){
 		quality = 2;
 	}else if($('#qual3').prop('checked')){
@@ -293,46 +337,128 @@ function saveNotes(){
 	}
 
 	var loc = $('#loc').val();
+	
+	localStorage.setItem("attendee-"+regid+"-quality", quality);
+	localStorage.setItem("attendee-"+regid+"-notes", regnotes);
+	localStorage.setItem("attendee-"+regid+"-notesuploaded", 0);
+	
+	$('#gotorecentlyregistered').hide();
+	$('#regnotestext').val('');
+	$('#qual0').prop('checked', true)
+	
+	if(loc=='0'){
+		$('#regnotes').val('');
+		$('#scanresponsetext').html("Saved notes");
+		window.location.href = '#eventScan';
+		$('#selectattendeebysurnamebuttonnew').hide();
+		$('#surnameselectdiv').hide();
+		$('#attendeesurnameselect').empty();
+		
+		$('#attendeesurnameselect').trigger('change');
+		$('#numresultsbysurnamefound').html('');
+	}else if(loc=='1'){
+		getRecentlyRegistered(-1, 0);
+		$('#gotoscanbarcodes').show();
+		window.location.href='#eventRegs';
+	}
 
-	$.ajax({
-		type: "POST",
-		data: {
-			"action": "setnotesforlocation",
-			"apikey": apikey,
-			"regid": regid,
-			"regnotes": regnotes,
-			"quality": quality
-		},
-		url: apiURL,
-		dataType: 'json',
-		success: function(response) {
-			if(!response.success){
-				$('#regnotesresponse').html(response.message);
-			}else{
-				$('#gotorecentlyregistered').hide();
-				if(loc=='0'){
-					$('#regnotes').val('');
-					$('#scanresponsetext').html(response.text);
-					window.location.href = '#eventScan';
-					$('#selectattendeebysurnamebuttonnew').hide();
-					$('#surnameselectdiv').hide();
-					$('#attendeesurnameselect').empty();
-					
-					$('#attendeesurnameselect').trigger('change');
-					$('#numresultsbysurnamefound').html('');
-				}else if(loc=='1'){
-					getRecentlyRegistered(-1, 0);
-					$('#gotoscanbarcodes').show();
-					window.location.href='#eventRegs';
-				}
-			}
-		}
-	});
 }
 
-function registerAttendee( eventid, barcode){
+function uploadNotes(attendeenum){
+	
+	var regnotes = localStorage.getItem("attendee-"+attendeenum+"-notes");
+	var quality = localStorage.getItem("attendee-"+attendeenum+"-quality");
+	var barcode = localStorage.getItem("attendee-"+attendeenum+"-barcode");
+	var notesstatus = localStorage.getItem("attendee-"+attendeenum+"-notesuploaded");
+	if(notesstatus==0){
+	
+		$.ajax({
+			type: "POST",
+			data: {
+				"action": "setnotesforlocation",
+				"apikey": apikey,
+				"barcode": barcode,
+				"regnotes": regnotes,
+				"quality": quality
+			},
+			url: apiURL,
+			dataType: 'json',
+			success: function(response) {
+				if(!response.success){
+					$('#regnotesresponse').html(response.message);
+					localStorage.setItem("attendee-"+regid+"-notesuploaded", 1);
+				}else{
+					window.location.href='#eventScan';
+				}
+			}
+		});
+	}
+}
+
+function registerAttendee( eventid, barcode, type){
+	
+	var found = false;
+	numattendees = parseInt(localStorage.getItem("numattendees"));
+	//first check for previous match
+	for(var i = 0; i<numattendees;i++){
+		var thiseventid = localStorage.getItem("attendee-"+i+"-eventid");
+		var thisbarcode = localStorage.getItem("attendee-"+i+"-barcode");
+		if(thiseventid==eventid && thisbarcode==barcode){
+			thisattendeenum = i;
+			found = true;
+			break;
+		}
+	}
+	
+	if(!found){
+		var thisattendeenum = numattendees;
+		numattendees++;
+		localStorage.setItem("numattendees", numattendees);
+		
+		localStorage.setItem("attendee-"+thisattendeenum+"-eventid", eventid);
+		localStorage.setItem("attendee-"+thisattendeenum+"-barcode", barcode);
+		localStorage.setItem("attendee-"+thisattendeenum+"-name", "");
+		localStorage.setItem("attendee-"+thisattendeenum+"-quality", -1);
+		localStorage.setItem("attendee-"+thisattendeenum+"-notes", "");
+		localStorage.setItem("attendee-"+thisattendeenum+"-uploaded", 1);
+		localStorage.setItem("attendee-"+thisattendeenum+"-notesuploaded", 0); // until notes are saved, there's nothing to upload
+		localStorage.setItem("attendee-"+thisattendeenum+"-attendeeid", -1);
+		
+		if(isInternet){
+			//uploadAttendee(thisattendeenum);
+		}
+	}else{
+		//do nothing if they have already been registered here, but send them on elsewhere later on as appropriate
+	}
+	
+	$('#surnameselect').html('');
+	$('#attendeesurname').val('');
+	$('#selectattendeebysurnamebuttonnew').hide();
+	$('#surnameselectdiv').hide();
+	$('#numresultsbysurnamefound').html('');
+	
+	if(type=='Exhibition Stand'){
+		//go to save notes page
+		$('#regid').val(thisattendeenum);
+		$('#loc').val('0');
+		$('#regnotestext').val('');
+		$('#pagename').html("Add notes for attendee");
+		$('#gotorecentlyregistered').show();
+	}else{
+		$('#scanresponsetext').html("Attendee details saved");
+	}
+	
+	if(type=='Exhibition Stand'){
+		window.location.href='#regNotes';
+	}
+}
+
+function uploadAttendee(attendeenum){
 	var uuid = $('#uuid').val();
 	var hostaddress = $('#hostaddresshidden').val();
+
+	var eventid = localStorage.getItem("attendee-"+attendeenum+"-eventid");
+	var barcode = localStorage.getItem("attendee-"+attendeenum+"-barcode");
 	
 	$.ajax({
 		type: "POST",
@@ -345,24 +471,12 @@ function registerAttendee( eventid, barcode){
 		url: apiURL,
 		dataType: 'json',
 		success: function(response) {
-			if(!response.success || !response.data.success){
-				$('#scanresponsetext').html(response.data.text);
-			}else{
-				$('#surnameselect').html('');
-				$('#attendeesurname').val('');
-				$('#selectattendeebysurnamebuttonnew').hide();
-				$('#surnameselectdiv').hide();
-				if(response.data.eventtype==1){
-					//go to save notes page
-					$('#regid').val(response.data.insertid);
-					$('#loc').val('0');
-					$('#regnotestext').val('');
-					$('#pagename').html("Add notes for " + response.data.name);
-					$('#gotorecentlyregistered').show();
-					window.location.href='#regNotes';
-				}else{
-					$('#scanresponsetext').html(response.data.text);
-				}
+			if(response.success && response.data.success){
+				//mark the attendee as having been uploaded
+				localStorage.setItem("attendee-"+attendeenum+"-name", response.data.name);
+				localStorage.setItem("attendee-"+attendeenum+"-uploaded", true);
+				localStorage.setItem("attendee-"+attendeenum+"-attendeeid", response.data.insertid);
+				
 			}
 		}
 	});
@@ -473,8 +587,8 @@ function afterLoginCheck(){
 	}
 }
 
-function populateList(){
-
+function populateList(rundisplay){
+	var thing = localStorage.getItem("attendee-0-notes");
 	
 	$.ajax({
 		type: "POST",
@@ -486,34 +600,66 @@ function populateList(){
 		dataType: 'json',
 		success: function(response) {
 			if(response.success){
-				$('#eventselect').html('');
-				var numlocations = 0;
-				var mainlocid = 0;
-				var output = "";
-				var firstelementid = 0;
-				var firstelementname = "";
-				$.each(response.data.list, function(index, item) {
-					output += "<option value='"+item.id+"'>"+item.name+"</option>";
-					if(numlocations==0){
-						firstelementid = item.id;
-						firstelementname = item.name;
-					}
-					numlocations++;
-					mainlocid = item.id;
-					
-				});
 				
-				$('#eventselect').html(output);
-				$('#eventselect').trigger('change');
-				if(numlocations==1){
-					//Only one location allowed to send them straight there
-					$('#eventscanid').val(mainlocid);
-					$('#event_name').html(firstelementname);
-					selectEvent();
-				}
+				numlocations = 0;
+				$.each(response.data.list, function(index, item) {
+					localStorage.setItem("location-"+numlocations+"-id", item.id);
+					localStorage.setItem("location-"+numlocations+"-name", item.name);
+					localStorage.setItem("locationtype-"+item.id, item.event_type);
+					
+					var exists = localStorage.getItem("location-"+numlocations+"-regs");
+					if(exists===null){
+						localStorage.setItem("location-"+numlocations+"-regs", "");
+					}
+					
+					numlocations++;
+
+				});
+
+			}
+			if(rundisplay){
+				displayLocationList();
 			}
 		}
 	});
+}
+
+function displayLocationListCheck(){
+	if(isInternet){
+		populateList(true);
+	}else{
+		displayLocationList();
+	}
+}
+
+function displayLocationList(){
+	var mainlocid = 0;
+	var output = "";
+	var firstelementid = 0;
+	var firstelementname = "";
+	$('#eventselect').html('');
+	
+	for(var i = 0;i<numlocations;i++){
+		var locationid = localStorage.getItem("location-"+i+"-id");
+		var locationname = localStorage.getItem("location-"+i+"-name");
+		var locationtype = localStorage.getItem("location-"+i+"-type");
+		output += "<option value='"+locationid+"'>"+locationname+"</option>";
+		if(numlocations==0){
+			firstelementid = locationid;
+			firstelementname = locationname;
+		}
+		mainlocid = locationid;
+	}
+	
+	$('#eventselect').html(output);
+	$('#eventselect').trigger('change');
+	
+	if(numlocations==1){
+		//Only one location allowed to send them straight there
+		$('#eventscanid').val(mainlocid);
+		$('#event_name').html(firstelementname);
+		selectEvent();
+	}
 }
 
 function selectEvent(){
@@ -521,6 +667,7 @@ function selectEvent(){
 	
 	$('#eventscanid').val(eventid);
 	$('#event_name').html($("#eventselect option:selected").text());
+	$('#eventscantype').val(localStorage.getItem("locationtype-"+eventid));
 	
 	window.location.href='#eventScan';
 }
@@ -573,7 +720,7 @@ function getRecentlyRegistered(eventid, preregistered){
 				$.each(response.data.registrations, function(index, registration) {
 					html += "<tr>";
 					html += "<td><br />";
-					if(eventid=='1' && security=='9'){
+					if(eventid=='1' && security=='9'){   // no longer can use eventid, fix this
 							//html += "<a href='#' id='gotoattendee_"+item[itemid].attendeeid+"' class='gotoattendeelink'>";
 					}
 					html += registration.name
@@ -765,7 +912,7 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 	switch (ui.toPage.prop("id")) {
 		case "attendeeHome":
 			checkIfLoggedIn(true);
-			populateList();
+			displayLocationListCheck();
 			break;
 		case "termsAndPrivacy":
 			break;

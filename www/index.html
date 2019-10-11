@@ -165,6 +165,7 @@
 
 		<div role="main" class="ui-content">
 			<input type='hidden' id='eventscanid' value='' />
+			<input type='hidden' id='eventscantype' value='' />
 			
 			<!-- banner content-->
 			<div class="banner">
@@ -178,16 +179,19 @@
 			<div class='pagebody center'>
 				<h3 id='event_name'></h3>
 				<button id="scanbutton" >Scan Barcode</button>
-				<div style="font-weight: bold;font-size:1.2em;">OR</div>
 
 				<div id="selectattendeecontent">
-				<br>
-				<input class="wide-control" type="text" id="attendeesurname" placeholder="Type an attendee's name to search for them">
-				<br>
-				<span id="numresultsbysurnamefound"></span>
-				<div id="surnameselect" style='width:10px;height:10px;'></div>
+					<div style="font-weight: bold;font-size:1.2em;">OR</div>
+					<br>
+					<input class="wide-control" type="text" id="attendeesurname" placeholder="Type an attendee's name to search for them">
+					<br>
+					<span id="numresultsbysurnamefound"></span>
+					<div id="surnameselect" style='width:10px;height:10px;'></div>
 					<div id='surnameselectdiv'><select id="attendeesurnameselect"></select></div>
 					<button style="display:none" onclick="registerAttendeeBySurname()" id="selectattendeebysurnamebuttonnew">Register attendee</button>
+				</div>
+				<div id='selectattendeecontentnotavailable' style='display:none'>
+					No internet connection detected, attendees cannot be searched for by name
 				</div>
 
 				<div id="scanresponsetext"></div>
