@@ -676,6 +676,52 @@ function getRecentlyRegistered(eventid, preregistered){
 	var uuid = $('#uuid').val();
 	var sorttype = $('#sorttype').val();
 	var security = localStorage.getItem('security');
+	numattendees = localStorage.getItem('numattendees');
+	var eventscantype = $('#eventscantype');
+	if(eventid==-1){
+		eventid = $('#eventregid').val();
+	}
+	
+		
+	var html = "<h3>Attendees registered for " + $('#event_name').val() + "</h3>";
+	html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
+	html += "<thead><tr>";
+	html += "<th onclick='resortName();' class='tablesorterheader";
+	if(sorttype=='nameup'){
+		html += " headerSortUp";
+	}else if(sorttype=='namedown'){
+		html += " headerSortDown";
+	}
+	html += "'>Name</th>";
+	
+	html += "<th>&nbsp</th></tr></thead>";
+	html += "<tbody>\n";
+	for(var i = 0;i<numattendees;i++){
+		name = localStorage.getItem('attendee-'+i+'-name');
+		barcode = localStorage.getItem('attendee-'+i+'-barcode');
+		if(name!=''){
+			name += " - "+barcode;
+		}else{
+			name = barcode;
+		}
+		
+		html += "<tr>";
+		html += "<td><br />";
+		html += name
+		html += "</td>";
+		html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+i+", "+eventid+", 1)'>Notes</button></td>";
+		html += "</tr>\n";
+	}
+	html += "</tbody></table>";
+	$('#recentregistrations').html(html);
+
+}
+
+/*
+function getRecentlyRegistered(eventid, preregistered){
+	var uuid = $('#uuid').val();
+	var sorttype = $('#sorttype').val();
+	var security = localStorage.getItem('security');
 	if(eventid==-1){
 		eventid = $('#eventregid').val();
 	}
@@ -738,6 +784,7 @@ function getRecentlyRegistered(eventid, preregistered){
 	});
 	
 }
+*/
 
 function resortDate(){
 	var sorttype = $('#sorttype').val();
