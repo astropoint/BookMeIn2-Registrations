@@ -2,7 +2,7 @@ $(document).ready(function(){
 	//This will need to be removed when it's uploaded to phone...
 	document.addEventListener('deviceready', onDeviceReady,false);
 	//onDeviceReady();
-	checkInternet();
+	checkInternet(null);
 	checkMobile();
 	
 	numattendees = localStorage.getItem("numattendees");
@@ -13,7 +13,7 @@ $(document).ready(function(){
 	
 	//check the status of the internet every 10 seconds
 	setInterval(function(){
-		checkInternet();
+		checkInternet(tryUploads);
 		
 		
 		refreshcount++;
@@ -50,7 +50,7 @@ var apikey = "";
 var numlocations = 0;
 var numattendees = 0;
 
-function checkInternet(){
+function checkInternet(callback){
 	var data = "action=checkconnection"; 
 	var success = false;
 	
@@ -70,6 +70,9 @@ function checkInternet(){
 					isInternet = true;
 					$('#selectattendeecontent').show();
 					$('#selectattendeecontentnotavailable').hide();
+					if(callback!==null){
+						callback();
+					}
 				}else{
 					isInternet = false;
 					$('#selectattendeecontent').hide();
@@ -133,11 +136,12 @@ $(document).on('change keyup', '#attendeesurname', function(e){
 					$('#scanresponsetext').html(response.message);
 				}else{
 					$('#attendeesurnameselect').html('');
-					var html = "";         
+					var html = "";
 					var numfound = parseInt(response.data.total);
 					
 					$.each(response.data.results, function(key, attendee) {
-						html += "<option value='"+attendee.reference+"'>"+attendee.full_name+"</option>";
+						var valuename = attendee.reference+"-"+attendee.first_name+"-"+attendee.last_name;
+						html += "<option value='"+valuename+"'>"+attendee.full_name+"</option>";
 					});
 					var response = numfound+" attendee";
 					if(numfound!=1){
@@ -269,6 +273,7 @@ function checkRegNotes(){
 
 function checkAllNotes(){
 	var regid = $('#eventregid').val();
+	
 	if(regid=='' || regid==0){
 		window.location.href = '#attendeeHome';
 	}
@@ -340,7 +345,7 @@ function saveNotes(){
 	
 	localStorage.setItem("attendee-"+regid+"-quality", quality);
 	localStorage.setItem("attendee-"+regid+"-notes", regnotes);
-	localStorage.setItem("attendee-"+regid+"-notesuploaded", 0);
+	localStorage.setItem("attendee-"+regid+"-notesuploaded", '0');
 	
 	$('#gotorecentlyregistered').hide();
 	$('#regnotestext').val('');
@@ -349,6 +354,7 @@ function saveNotes(){
 	if(loc=='0'){
 		$('#regnotes').val('');
 		$('#scanresponsetext').html("Saved notes");
+		uploadNotes(regid, false);
 		window.location.href = '#eventScan';
 		$('#selectattendeebysurnamebuttonnew').hide();
 		$('#surnameselectdiv').hide();
@@ -364,11 +370,40 @@ function saveNotes(){
 
 }
 
-function uploadNotes(attendeenum){
+var attemptinguploads = false;
+function tryUploads(){
+	if(!attemptinguploads){
+		attemptinguploads = true;
+		var numattendees = localStorage.getItem("numattendees");
+		
+		for(var i = 0;i<numattendees;i++){
+			var uploaded = localStorage.getItem("attendee-"+i+"-uploaded");
+			if(uploaded=='0'){
+				uploadAttendee(i, true);
+				//if we upload, stop the function, and wait for it to be called again
+				return true;
+			}
+		}
+		
+		for(var i = 0;i<numattendees;i++){
+			var uploaded = localStorage.getItem("attendee-"+i+"-notesuploaded");
+			if(uploaded=='0'){
+				uploadNotes(i, true);
+				//if we upload, stop the function, and wait for it to be called again
+				return true;
+			}
+		}
+		
+		attemptinguploads = false;
+	}
+}
+
+function uploadNotes(attendeenum, tryuploadsagain){
 	
 	var regnotes = localStorage.getItem("attendee-"+attendeenum+"-notes");
 	var quality = localStorage.getItem("attendee-"+attendeenum+"-quality");
 	var barcode = localStorage.getItem("attendee-"+attendeenum+"-barcode");
+	var eventid = localStorage.getItem("attendee-"+attendeenum+"-eventid");
 	var notesstatus = localStorage.getItem("attendee-"+attendeenum+"-notesuploaded");
 	if(notesstatus==0){
 	
@@ -379,23 +414,37 @@ function uploadNotes(attendeenum){
 				"apikey": apikey,
 				"barcode": barcode,
 				"regnotes": regnotes,
-				"quality": quality
+				"quality": quality,
+				"eventid": eventid
 			},
 			url: apiURL,
 			dataType: 'json',
 			success: function(response) {
-				if(!response.success){
-					$('#regnotesresponse').html(response.message);
-					localStorage.setItem("attendee-"+regid+"-notesuploaded", 1);
+				if(response.success){
+					localStorage.setItem("attendee-"+attendeenum+"-notesuploaded", '1');
+					if(tryuploadsagain){
+						tryUploads();
+					}
 				}else{
-					window.location.href='#eventScan';
+					attemptinguploads = false;
 				}
+				getRecentlyRegistered(-1, false);
+			},
+			error: function(error){
+				attemptinguploads = false;
 			}
 		});
 	}
 }
 
-function registerAttendee( eventid, barcode, type){
+function registerAttendee( eventid, thisbarcode, type){
+	
+	var splitbarcode = thisbarcode.split("-");
+	barcode = splitbarcode[0];
+	name = "";
+	if(splitbarcode.length==3){
+		name = splitbarcode[1]+" "+splitbarcode[2];
+	}
 	
 	var found = false;
 	numattendees = parseInt(localStorage.getItem("numattendees"));
@@ -417,15 +466,15 @@ function registerAttendee( eventid, barcode, type){
 		
 		localStorage.setItem("attendee-"+thisattendeenum+"-eventid", eventid);
 		localStorage.setItem("attendee-"+thisattendeenum+"-barcode", barcode);
-		localStorage.setItem("attendee-"+thisattendeenum+"-name", "");
+		localStorage.setItem("attendee-"+thisattendeenum+"-name", name);
 		localStorage.setItem("attendee-"+thisattendeenum+"-quality", -1);
 		localStorage.setItem("attendee-"+thisattendeenum+"-notes", "");
-		localStorage.setItem("attendee-"+thisattendeenum+"-uploaded", 1);
-		localStorage.setItem("attendee-"+thisattendeenum+"-notesuploaded", 0); // until notes are saved, there's nothing to upload
+		localStorage.setItem("attendee-"+thisattendeenum+"-uploaded", '0');
+		localStorage.setItem("attendee-"+thisattendeenum+"-notesuploaded", '0'); // until notes are saved, there's nothing to upload
 		localStorage.setItem("attendee-"+thisattendeenum+"-attendeeid", -1);
 		
 		if(isInternet){
-			//uploadAttendee(thisattendeenum);
+			uploadAttendee(thisattendeenum, false);
 		}
 	}else{
 		//do nothing if they have already been registered here, but send them on elsewhere later on as appropriate
@@ -453,7 +502,7 @@ function registerAttendee( eventid, barcode, type){
 	}
 }
 
-function uploadAttendee(attendeenum){
+function uploadAttendee(attendeenum, tryuploadsagain){
 	var uuid = $('#uuid').val();
 	var hostaddress = $('#hostaddresshidden').val();
 
@@ -474,10 +523,17 @@ function uploadAttendee(attendeenum){
 			if(response.success && response.data.success){
 				//mark the attendee as having been uploaded
 				localStorage.setItem("attendee-"+attendeenum+"-name", response.data.name);
-				localStorage.setItem("attendee-"+attendeenum+"-uploaded", true);
+				localStorage.setItem("attendee-"+attendeenum+"-uploaded", '1');
 				localStorage.setItem("attendee-"+attendeenum+"-attendeeid", response.data.insertid);
-				
+				if(tryuploadsagain){
+					tryUploads();
+				}
+			}else{
+				attemptinguploads = false;
 			}
+		},
+		error: function(error){
+			attemptinguploads = false;
 		}
 	});
 }
@@ -683,7 +739,7 @@ function getRecentlyRegistered(eventid, preregistered){
 	}
 	
 		
-	var html = "<h3>Attendees registered for " + $('#event_name').val() + "</h3>";
+	var html = "<h3>Attendees registered for " + $('#event_name').html() + "</h3>";
 	html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
 	html += "<thead><tr>";
 	html += "<th onclick='resortName();' class='tablesorterheader";
@@ -694,97 +750,37 @@ function getRecentlyRegistered(eventid, preregistered){
 	}
 	html += "'>Name</th>";
 	
-	html += "<th>&nbsp</th></tr></thead>";
+	html += "<th>Upload<br>Status</th><th>&nbsp;</th></tr></thead>";
 	html += "<tbody>\n";
 	for(var i = 0;i<numattendees;i++){
 		name = localStorage.getItem('attendee-'+i+'-name');
 		barcode = localStorage.getItem('attendee-'+i+'-barcode');
-		if(name!=''){
-			name += " - "+barcode;
-		}else{
-			name = barcode;
+		if(barcode!==null){
+			if(name!=''){
+				name += " - "+barcode;
+			}else{
+				name = barcode;
+			}
+			
+			html += "<tr>";
+			html += "<td><br />";
+			html += name
+			html += "</td>";
+			html += "<td>";
+			if(localStorage.getItem('attendee-'+i+'-uploaded')=='1' && localStorage.getItem('attendee-'+i+'-notesuploaded')=='1'){
+				html += "Uploaded";
+			}else{
+				html += "Pending";
+			}
+			html += "</td>";
+			html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+i+", "+eventid+", 1)'>Notes</button></td>";
+			html += "</tr>\n";
 		}
-		
-		html += "<tr>";
-		html += "<td><br />";
-		html += name
-		html += "</td>";
-		html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+i+", "+eventid+", 1)'>Notes</button></td>";
-		html += "</tr>\n";
 	}
 	html += "</tbody></table>";
 	$('#recentregistrations').html(html);
 
 }
-
-/*
-function getRecentlyRegistered(eventid, preregistered){
-	var uuid = $('#uuid').val();
-	var sorttype = $('#sorttype').val();
-	var security = localStorage.getItem('security');
-	if(eventid==-1){
-		eventid = $('#eventregid').val();
-	}
-	
-	$.ajax({
-		type: "POST",
-		data: {
-			"action": "getrecentregistrations",
-			"apikey": apikey,
-			"eventid": eventid,
-			"sorttype": sorttype,
-			"preregistered": preregistered,
-		},
-		url: apiURL,
-		dataType: 'json',
-		success: function(response) {
-			if(!response.success){
-				$('#recentregistrations').html(response.message);
-			}else{
-				var html = "<h3>Attendees registered for " + $('#event_name').val() + "</h3>";
-				html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
-				html += "<thead><tr>";
-				html += "<th onclick='resortName();' class='tablesorterheader";
-				if(sorttype=='nameup'){
-					html += " headerSortUp";
-				}else if(sorttype=='namedown'){
-					html += " headerSortDown";
-				}
-				html += "'>Name</th>";
-										
-				if(preregistered=='0'){
-					html += "<th style='padding-right: 30px;' onclick='resortDate();' class='tablesorterheader";
-					if(sorttype=='dateup'){
-						html += " headerSortUp";
-					}else if(sorttype=='datedown'){
-						html += " headerSortDown";
-					}
-					html += "'>Time<br />registered</th>";  
-				}
-				html += "<th>&nbsp</th></tr></thead>";
-				html += "<tbody>\n";
-				$.each(response.data.registrations, function(index, registration) {
-					html += "<tr>";
-					html += "<td><br />";
-					if(eventid=='1' && security=='9'){   // no longer can use eventid, fix this
-							//html += "<a href='#' id='gotoattendee_"+item[itemid].attendeeid+"' class='gotoattendeelink'>";
-					}
-					html += registration.name
-					html += "</td>";
-					if(preregistered=='0'){
-						html += "<td><br />"+registration.time+"</td>";
-					}
-					html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+registration.id+", "+eventid+", 1)'>Notes</button></td>";
-					html += "</tr>\n";
-				});
-				html += "</tbody></table>";
-				$('#recentregistrations').html(html);
-			}
-		}
-	});
-	
-}
-*/
 
 function resortDate(){
 	var sorttype = $('#sorttype').val();
