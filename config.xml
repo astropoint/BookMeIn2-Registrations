@@ -10,8 +10,7 @@
     <content src="index.html" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="android-minSdkVersion" value="15" />
-    <preference name="android-targetSdkVersion" value="28" />
-    <preference name="phonegap-version" value="cli-7.1.0" />
+    <preference name="phonegap-version" value="cli-9.0.0" />
     <plugin name="cordova-plugin-camera" source="npm" />
     <plugin name="cordova-plugin-device" source="npm" />
     <plugin name="cordova-plugin-inappbrowser" source="npm" />
