@@ -354,7 +354,9 @@ function saveNotes(){
 	if(loc=='0'){
 		$('#regnotes').val('');
 		$('#scanresponsetext').html("Saved notes");
-		uploadNotes(regid, false);
+		if(isInternet){
+			uploadNotes(regid, false);
+		}
 		window.location.href = '#eventScan';
 		$('#selectattendeebysurnamebuttonnew').hide();
 		$('#surnameselectdiv').hide();
@@ -372,6 +374,7 @@ function saveNotes(){
 
 var attemptinguploads = false;
 function tryUploads(){
+	console.log("Trying uploads "+attemptinguploads);
 	if(!attemptinguploads){
 		attemptinguploads = true;
 		var numattendees = localStorage.getItem("numattendees");
@@ -389,6 +392,7 @@ function tryUploads(){
 			var uploaded = localStorage.getItem("attendee-"+i+"-notesuploaded");
 			if(uploaded=='0'){
 				uploadNotes(i, true);
+				attemptinguploads = false;
 				//if we upload, stop the function, and wait for it to be called again
 				return true;
 			}
@@ -423,6 +427,7 @@ function uploadNotes(attendeenum, tryuploadsagain){
 				if(response.success){
 					localStorage.setItem("attendee-"+attendeenum+"-notesuploaded", '1');
 					if(tryuploadsagain){
+						attemptinguploads = false;
 						tryUploads();
 					}
 				}else{
@@ -526,6 +531,7 @@ function uploadAttendee(attendeenum, tryuploadsagain){
 				localStorage.setItem("attendee-"+attendeenum+"-uploaded", '1');
 				localStorage.setItem("attendee-"+attendeenum+"-attendeeid", response.data.insertid);
 				if(tryuploadsagain){
+					attemptinguploads = false;
 					tryUploads();
 				}
 			}else{
