@@ -226,6 +226,7 @@
 			<div class='pagebody center'>
 				<input type="hidden" id="regid">
 				<input type="hidden" id="loc" value="1">
+				<h3 id='regnotesname'></h3>
 				<button onclick="saveNotes();">Save</button>
 				<br><textarea class="wide-control" id="regnotestext" placeholder="Type some notes" rows="10" wrap="soft"></textarea>
 				<br>
@@ -251,7 +252,7 @@
 			<title>Recent Registrations</title>
 			<script id="panel-init">
 					$(function() {
-						$( "body>[data-role='panel']" ).panel();
+						$( "body>[data-role='panel']" ).panel(); 
 					});
 			</script>
 

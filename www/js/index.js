@@ -140,7 +140,7 @@ $(document).on('change keyup', '#attendeesurname', function(e){
 					var numfound = parseInt(response.data.total);
 					
 					$.each(response.data.results, function(key, attendee) {
-						var valuename = attendee.reference+"-"+attendee.first_name+"-"+attendee.last_name;
+						var valuename = attendee.reference+"_"+attendee.first_name+"_"+attendee.last_name;
 						html += "<option value='"+valuename+"'>"+attendee.full_name+"</option>";
 					});
 					var response = numfound+" attendee";
@@ -236,6 +236,31 @@ function checkEventScan(){
 	}
 }
 
+function updateLocalAttendeeName(barcode, updateregnotestitle){
+	
+	$.ajax({
+		type: "POST",
+		data: {
+			"action": "getattendeedetails",
+			"apikey": apikey,
+			"barcode": barcode
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(response.success){
+				localStorage.setItem("attendee-"+attendeenum+"-name", response.data.first_name+" "+response.data.last_name);
+				if(updateregnotestitle){
+					$('#regnotesname').html("Notes for "+response.data.first_name+" "+response.data.last_name);
+				}
+			}
+		},
+		error: function(error){
+			attemptinguploads = false;
+		}
+	});
+}
+
 function checkRegNotes(){
 	var regid = $('#regid').val();
 	
@@ -244,6 +269,16 @@ function checkRegNotes(){
 	}else{
 		var notes = localStorage.getItem("attendee-"+regid+"-notes");
 		var quality = localStorage.getItem("attendee-"+regid+"-quality");
+		var name = localStorage.getItem("attendee-"+regid+"-name");
+		var barcode = localStorage.getItem("attendee-"+regid+"-barcode");
+		var splitbarcode = barcode.split("-");
+		if(name=='' && splitbarcode.length=='1' && isInternet){
+			updateLocalAttendeeName(barcode, true);
+		}else if(name=='' && splitbarcode.length=='1'){
+			$('#regnotesname').html("Notes for "+barcode);
+		}else{
+			$('#regnotesname').html("Notes for "+name);
+		}
 		if(quality!==null){
 			$('#qual0').prop('checked', false);
 			$('#qual1').prop('checked', false);
@@ -367,6 +402,9 @@ function saveNotes(){
 	}else if(loc=='1'){
 		getRecentlyRegistered(-1, 0);
 		$('#gotoscanbarcodes').show();
+		if(isInternet){
+			uploadNotes(regid, false);
+		}
 		window.location.href='#eventRegs';
 	}
 
@@ -444,7 +482,7 @@ function uploadNotes(attendeenum, tryuploadsagain){
 
 function registerAttendee( eventid, thisbarcode, type){
 	
-	var splitbarcode = thisbarcode.split("-");
+	var splitbarcode = thisbarcode.split("_");
 	barcode = splitbarcode[0];
 	name = "";
 	if(splitbarcode.length==3){
@@ -480,6 +518,11 @@ function registerAttendee( eventid, thisbarcode, type){
 		
 		if(isInternet){
 			uploadAttendee(thisattendeenum, false);
+		}else{
+			if(splitbarcode.length==1 && isInternet){
+				//1 D barcode, and internet, look up the name as well
+				updateLocalAttendeeName(barcode, false);
+			}
 		}
 	}else{
 		//do nothing if they have already been registered here, but send them on elsewhere later on as appropriate

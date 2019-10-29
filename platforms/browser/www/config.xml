@@ -21,7 +21,6 @@
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <preference name="DisallowOverscroll" value="true" />
-    <preference name="android-minSdkVersion" value="15" />
-    <preference name="android-targetSdkVersion" value="28" />
-    <preference name="phonegap-version" value="cli-7.1.0" />
+    <preference name="android-minSdkVersion" value="19" />
+    <preference name="phonegap-version" value="cli-9.0.0" />
 </widget>
