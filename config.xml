@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.jmdb.bookmein2" version="2.1.3" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.jmdb.bookmein2" version="2.1.4" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
 	<name>BookMeIn2</name>
     <description>
         Register attendees at conferences and events.
@@ -107,4 +107,12 @@
 		<config-file platform="ios" parent="NSPhotoLibraryUsageDescription" mode="replace">
 			<string>The app will need access to the photo library to scan any previously stored barcodes.</string>
 		</config-file>
+		
+		<edit-config target="NSCameraUsageDescription" file="*-Info.plist" mode="merge">
+			<string>The app will need access to the camera in order to scan barcodes</string>
+		</edit-config>
+		
+		<edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+				<string>The app will need access to the photo library to scan any previously stored barcodes</string>
+		</edit-config>
 </widget>
