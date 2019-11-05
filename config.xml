@@ -19,6 +19,7 @@
     <plugin name="cordova-plugin-x-toast" source="npm" />
     <plugin name="phonegap-plugin-barcodescanner" source="npm" />
     <plugin name='cordova-plugin-app-version' source='npm' />
+    <icon src="www/res/icon/ios/BMI1024x1024.png" width="1024" height="1024" />
     <platform name="android">
         <icon density="ldpi" src="www/res/icon/android/drawable-ldpi-icon.png" />
         <icon density="mdpi" src="www/res/icon/android/drawable-mdpi-icon.png" />
