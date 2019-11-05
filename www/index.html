@@ -52,10 +52,10 @@
 		</div> 
 
 		<div role="main" class="ui-content">
-			<h1>Terms &amp; Conditions</h1>
+			<h3>Terms &amp; Conditions</h3>
 			<p>We are storing the details</p>
 							 
-			<h1>Privacy</h1>
+			<h3>Privacy</h3>
 			<p>The app collects the data entered by the user at the conference and this is then sent over to our servers to be used to record the delegate's and attendance.</p>
 			
 			<p></p>
@@ -81,7 +81,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name">  </h1>
+			<h3 class="logo center conference_name">  </h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			
@@ -104,7 +104,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name">  </h1>
+			<h3 class="logo center conference_name">  </h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			
@@ -137,7 +137,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
@@ -173,11 +173,11 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
-				<h3 id='event_name'></h3>
+				<h4 id='event_name'></h4>
 				<button id="scanbutton" >Scan Barcode</button>
 
 				<div id="selectattendeecontent">
@@ -220,26 +220,25 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
 				<input type="hidden" id="regid">
 				<input type="hidden" id="loc" value="1">
-				<h3 id='regnotesname'></h3>
+				<h4 id='regnotesname'></h4>
 				<button onclick="saveNotes();">Save</button>
-				<br><textarea class="wide-control" id="regnotestext" placeholder="Type some notes" rows="10" wrap="soft"></textarea>
+				<br><textarea class="wide-control" id="regnotestext" placeholder="Type some notes" rows="5" wrap="soft"></textarea>
 				<br>
 				<div id="leadqualitydiv">Lead Quality:
-					<input class='radionmargin' type="radio" checked="checked" name="quality" id="qual0" value="0" />
-					<label for="qual0">&nbsp;N/A</label>
-					<input class='radionmargin' type="radio" name="quality" id="qual1" value="1" />
-					<label for="qual1">&nbsp;Low</label>
-					<input class='radionmargin' type="radio" name="quality" id="qual2" value="2" />
-					<label for="qual2">&nbsp;Medium</label>
-					<input class='radionmargin' type="radio" name="quality" id="qual3" value="3" />
-					<label for="qual3">&nbsp;High</label>
+					<select id='quality' name='quality'>
+						<option value='0' id='qual0'>N/A</option>
+						<option value='1' id='qual1'>Low</option>
+						<option value='2' id='qual2'>Medium</option>
+						<option value='3' id='qual3'>High</option>
+					</select>
 				</div>
+				<button onclick="saveNotes();">Save</button>
 				
 				<div id='regnotesresponse'></div>
 			</div>
@@ -265,7 +264,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
@@ -296,7 +295,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
@@ -330,7 +329,7 @@
 					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
 				</div>			
 			</div>	
-			<h1 class="logo center conference_name"></h1>
+			<h3 class="logo center conference_name"></h3>
 			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
 			
 			<div class='pagebody center'>
@@ -339,7 +338,7 @@
 				
 				<div class='row'>
 					<div class='col-12'>
-						<h3><span id="attendee_dets_first_name"> </span>  <span id="attendee_dets_last_name"> </span></h3>
+						<h4><span id="attendee_dets_first_name"> </span>  <span id="attendee_dets_last_name"> </span></h4>
 					</div>
 				</div>
 				
@@ -382,10 +381,42 @@
 			</div>
 		</div>
 	</div>
+	
+	<div data-role="page" class='mypage' id="standManagerPage">
+		<input type="hidden" id="eventregid">
+		<div data-role="header">
+			<title>View all attendees on stand</title>
+			<script id="panel-init">
+					$(function() {
+						$( "body>[data-role='panel']" ).panel();
+					});
+			</script>
+
+		</div>
+
+		<div role="main" class="ui-content">
+				<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h3 class="logo center conference_name"></h3>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				<div id='standmanagerdetails'>
+					No attendees found on stand
+				</div>
+				<div><a href='#' onclick='getAllStandDetails()'><i class="fa fa-refresh" aria-hidden="true"></i> Refresh page</a></div>
+			</div>
+		</div>
+	</div>
 
 	<div data-role="panel" id="leftpanel" data-position="left" data-display="reveal" data-theme="a">
 
 		<a class='menu_link' href="#attendeeHome"><span class='fa-menu-item'><i class="fa fa-home fa-menu"></i></span> Home</a><br>
+		<a class='menu_link' href="#standManagerPage" style='display:none' id='standmanagerpagelink'><span class='fa-menu-item'><i class="fa fa-info" aria-hidden="true"></i></span> Stand Manager</a><br id='standmanagerbreak'>
 		<a class='menu_link' href="#appHelpPage"><span class='fa-menu-item'><i class="fa fa-question-circle" aria-hidden="true"></span></i> Help</a><br>
 		<a class='menu_link' href="#aboutPage"><span class='fa-menu-item'><i class="fa fa-info" aria-hidden="true"></i></span> About</a><br>
 		<a class='menu_link' href="#delegateIndex" id="close_btn"><span class='fa-menu-item'><i class="fa fa-sign-out" aria-hidden="true"></i></span> Logout</a>

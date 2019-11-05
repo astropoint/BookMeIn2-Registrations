@@ -237,3 +237,6 @@ table.backwhite tr:last-child td{
 td.aligncenter{
 	align:center;
 }
+
+/* jquerymobile ignores rows attributes for textarea */
+textarea.ui-input-text { height: inherit !important}
