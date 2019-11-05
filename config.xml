@@ -100,4 +100,11 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
+		<config-file platform="ios" parent="NSCameraUsageDescription" mode="replace">
+			<string>The app will need access to the camera in order to scan barcodes.</string>
+		</config-file>
+
+		<config-file platform="ios" parent="NSPhotoLibraryUsageDescription" mode="replace">
+			<string>The app will need access to the photo library to scan any previously stored barcodes.</string>
+		</config-file>
 </widget>
