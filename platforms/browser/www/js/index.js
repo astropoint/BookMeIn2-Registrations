@@ -280,24 +280,9 @@ function checkRegNotes(){
 			$('#regnotesname').html("Notes for "+name);
 		}
 		if(quality!==null){
-			$('#qual0').prop('checked', false);
-			$('#qual1').prop('checked', false);
-			$('#qual2').prop('checked', false);
-			$('#qual3').prop('checked', false);
-			
-				if(quality=='1'){
-					$('#qual1').prop("checked", true);
-				}else if(quality=='2'){
-					$('#qual2').prop("checked", true);
-					console.log($('#qual2').parent().html());
-				}else if(quality=='3'){
-					$('#qual3').prop("checked", true);
-				}else{
-					$('#qual0').prop("checked", true);
-				}
-				
+			$('#quality').val(quality)
 		}else{
-			$('#qual0').prop("checked", true);
+			$('#quality').val('0');
 		}
 		$("input[type='radio']").checkboxradio("refresh");
 		if(notes!==null){
@@ -368,13 +353,7 @@ function saveNotes(){
 	var regid = $('#regid').val();
 	var regnotes = $('#regnotestext').val();
 	var quality = 0;
-	if($('#qual1').prop('checked')){
-		quality = 1;
-	}else if($('#qual2').prop('checked')){
-		quality = 2;
-	}else if($('#qual3').prop('checked')){
-		quality = 3;
-	}
+	quality = $('#quality').val();
 
 	var loc = $('#loc').val();
 	
@@ -384,11 +363,12 @@ function saveNotes(){
 	
 	$('#gotorecentlyregistered').hide();
 	$('#regnotestext').val('');
-	$('#qual0').prop('checked', true)
+	$('#quality').val('0');
+	$('#quality').selectmenu('refresh', true);
 	
 	if(loc=='0'){
 		$('#regnotes').val('');
-		$('#scanresponsetext').html("Saved notes");
+		$('#scanresponsetext').html(localStorage.getItem("attendee-"+regid+"-name")+" has been updated");
 		if(isInternet){
 			uploadNotes(regid, false);
 		}
@@ -660,6 +640,7 @@ $(document).on('click',"#log_in_btn",function(e){
 					localStorage.setItem("conferenceid", response.data.conferenceid);
 					localStorage.setItem("apphelptext", response.data.apphelptext);
 					localStorage.setItem("security", parseInt(response.data.security));
+					localStorage.setItem("stand_manager", parseInt(response.data.stand_manager));
 					
 					afterLoginCheck();
 					
@@ -684,6 +665,15 @@ function afterLoginCheck(){
 	$('#apphelptext').html(localStorage.getItem('apphelptext'));
 		
 	apikey = localStorage.getItem('apikey');
+	stand_manager = localStorage.getItem('stand_manager');
+					
+	if(stand_manager==1){
+		$('#standmanagerpagelink').show();
+		$('#standmanagerbreak').show();
+	}else{
+		$('#standmanagerpagelink').hide();
+		$('#standmanagerbreak').hide();
+	}
 		
 	if(parseInt(localStorage.getItem('security'))>=9){
 		$('#gottoselectattendee').show();
@@ -878,14 +868,11 @@ function goToSaveNotes(noteid, eventid, loc){
 				
 				$('#gotoscanbarcodes').hide();
 				$('#regnotestext').val(response.data.notes);
-				$('#qual'+response.data.lead_quality).prop('checked', true);
+				$('#quality').val(response.data.lead_quality);
 				$('#gotorecentlyregistered').show();
 				
 				
 				window.location.href = '#regNotes'; 
-				
-				$("input[name='quality']").checkboxradio();
-				$("input[name='quality']").checkboxradio("refresh"); //otherwise the radio button doesn't update with the actual selected value
 			}
 		}
 	});	
@@ -976,7 +963,7 @@ function goToViewAttendee(attendeeref){
 		}
 	});
 }
-
+ 
 function goToRecentRegList(){
 	var eventid = $('#eventselect').val();
 	getRecentlyRegistered(eventid, 0);
@@ -991,6 +978,94 @@ function goToRecentRegList(){
 function goToSelectAttendee(){
 	
 	window.location.href='#selectAttendee';
+}
+
+/*
+ * This ASSUMES a stand manager is only on one stand, 
+ * TODO needs fixing to allow admins or similar to also see this presumably down the line 
+ */
+function getAllStandDetails(){
+	var eventid = $('#eventselect').val();
+	
+	if(isInternet){
+		$.ajax({
+			type: "POST",
+			data: {
+					"action": "getstandmanagerregs",
+					"apikey": apikey,
+					"eventid": eventid
+			},
+			url: apiURL,
+			dataType: 'json',
+			success: function(response) {
+				console.log(response);
+				if(response.success){
+					
+					
+					var html = "<h4>"+response.data.total+" attendees registered for " + $('#event_name').html() + "</h4>";
+					html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
+					html += "<thead><tr>";
+					html += "<th onclick='resortName();' class='tablesorterheader";
+					if(sorttype=='nameup'){
+						html += " headerSortUp";
+					}else if(sorttype=='namedown'){
+						html += " headerSortDown";
+					}
+					html += "'>Name</th>";
+					
+					html += "<th>Quality</th><th>Notes</th><th>Time</th></tr></thead>";
+					html += "<tbody>\n";
+					for(var i = 0;i<response.data.registrations.length;i++){
+						name = response.data.registrations[i].name;
+						time = response.data.registrations[i].time;
+						notes = response.data.registrations[i].notes;
+						lead_quality = response.data.registrations[i].lead_quality;
+						html += "<tr>";
+							html += "<td>";
+								html += name;
+							html += "</td>";
+							html += "<td>";
+								switch(lead_quality){
+									case '1':
+										html += "Low";
+										break;
+									case '2':
+										html += "Mediaum";
+										break;
+									case '3':
+										html += "High";
+										break;
+									default:
+										html += "N/A";
+								}
+							html += "</td>";
+							html += "<td>";
+								html += notes;
+							html += "</td>";
+							html += "<td>";
+								html += time;
+							html += "</td>";
+						html += "</tr>\n";
+					}
+					html += "</tbody></table>";
+					$('#standmanagerdetails').html(html);
+					
+					
+				}else{
+					$('#standmanagerdetails').html(response.message);
+				}
+				
+				
+				
+				
+				
+				
+				
+			}
+		});
+	}else{
+		$('#standmanagerdetails').html("Currently there is no internet access so this list cannot be loaded.  Once access is restored, please refresh the page");
+	}
 }
 
 function dateWithoutSeconds(date){
@@ -1034,6 +1109,10 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 			checkIfLoggedIn(true);
 			checkIfAdmin();
 			checkViewAttendee();
+			break;
+		case "standManagerPage":
+			checkIfLoggedIn(true);
+			getAllStandDetails();
 			break;
 		default:
 			console.log("NO PAGE INIT FUNCTION")
