@@ -6,15 +6,16 @@ $(document).ready(function(){
 	checkMobile();
 	
 	numattendees = localStorage.getItem("numattendees");
+	console.log(numattendees);
 	if(numattendees===null){
 		numattendees = 0;
 		localStorage.setItem("numattendees", 0);
 	}
+	console.log(numattendees);
 	
 	//check the status of the internet every 10 seconds
 	setInterval(function(){
 		checkInternet(tryUploads);
-		
 		
 		refreshcount++;
 	}, 10000);
@@ -68,7 +69,12 @@ function checkInternet(callback){
 			success: function(response){
 				if(response.success){
 					isInternet = true;
-					$('#selectattendeecontent').show();
+					allow_name_search = localStorage.getItem('allow_name_search');
+					if(allow_name_search==1){
+						$('#selectattendeecontent').show();
+					}else{
+						$('#selectattendeecontent').hide();
+					}
 					$('#selectattendeecontentnotavailable').hide();
 					if(callback!==null){
 						callback();
@@ -140,7 +146,7 @@ $(document).on('change keyup', '#attendeesurname', function(e){
 					var numfound = parseInt(response.data.total);
 					
 					$.each(response.data.results, function(key, attendee) {
-						var valuename = attendee.reference+"_"+attendee.first_name+"_"+attendee.last_name;
+						var valuename = attendee.reference+"_"+attendee.first_name+"_"+attendee.last_name+"_"+attendee.job_title+"_"+attendee.organisation;
 						html += "<option value='"+valuename+"'>"+attendee.full_name+"</option>";
 					});
 					var response = numfound+" attendee";
@@ -250,6 +256,8 @@ function updateLocalAttendeeName(barcode, updateregnotestitle){
 		success: function(response) {
 			if(response.success){
 				localStorage.setItem("attendee-"+attendeenum+"-name", response.data.first_name+" "+response.data.last_name);
+				localStorage.setItem("attendee-"+attendeenum+"-job_title", response.data.job_title);
+				localStorage.setItem("attendee-"+attendeenum+"-organisation", response.data.organisation);
 				if(updateregnotestitle){
 					$('#regnotesname').html("Notes for "+response.data.first_name+" "+response.data.last_name);
 				}
@@ -270,14 +278,25 @@ function checkRegNotes(){
 		var notes = localStorage.getItem("attendee-"+regid+"-notes");
 		var quality = localStorage.getItem("attendee-"+regid+"-quality");
 		var name = localStorage.getItem("attendee-"+regid+"-name");
+		var organisation = localStorage.getItem("attendee-"+regid+"-organisation");
+		var job_title = localStorage.getItem("attendee-"+regid+"-job_title");
 		var barcode = localStorage.getItem("attendee-"+regid+"-barcode");
-		var splitbarcode = barcode.split("-");
+		var splitbarcode = barcode.split("_");
 		if(name=='' && splitbarcode.length=='1' && isInternet){
 			updateLocalAttendeeName(barcode, true);
 		}else if(name=='' && splitbarcode.length=='1'){
 			$('#regnotesname').html("Notes for "+barcode);
 		}else{
 			$('#regnotesname').html("Notes for "+name);
+		}
+		if(organisation!='' && job_title!=''){
+			$('#regnotesname').append("<br>");
+			if(job_title!='' && job_title!='undefined'){
+				$('#regnotesname').append(job_title+", ");
+			}
+			if(organisation!='' && organisation!='undefined'){
+				$('#regnotesname').append(organisation);
+			}
 		}
 		if(quality!==null){
 			$('#quality').val(quality)
@@ -465,8 +484,10 @@ function registerAttendee( eventid, thisbarcode, type){
 	var splitbarcode = thisbarcode.split("_");
 	barcode = splitbarcode[0];
 	name = "";
-	if(splitbarcode.length==3){
+	if(splitbarcode.length==5){
 		name = splitbarcode[1]+" "+splitbarcode[2];
+		job_title = splitbarcode[3];
+		organisation = splitbarcode[4];
 	}
 	
 	var found = false;
@@ -490,6 +511,8 @@ function registerAttendee( eventid, thisbarcode, type){
 		localStorage.setItem("attendee-"+thisattendeenum+"-eventid", eventid);
 		localStorage.setItem("attendee-"+thisattendeenum+"-barcode", barcode);
 		localStorage.setItem("attendee-"+thisattendeenum+"-name", name);
+		localStorage.setItem("attendee-"+thisattendeenum+"-organisation", organisation);
+		localStorage.setItem("attendee-"+thisattendeenum+"-job_title", job_title);
 		localStorage.setItem("attendee-"+thisattendeenum+"-quality", -1);
 		localStorage.setItem("attendee-"+thisattendeenum+"-notes", "");
 		localStorage.setItem("attendee-"+thisattendeenum+"-uploaded", '0');
@@ -641,12 +664,13 @@ $(document).on('click',"#log_in_btn",function(e){
 					localStorage.setItem("apphelptext", response.data.apphelptext);
 					localStorage.setItem("security", parseInt(response.data.security));
 					localStorage.setItem("stand_manager", parseInt(response.data.stand_manager));
+					localStorage.setItem("allow_name_search", parseInt(response.data.allow_name_search));
 					
 					afterLoginCheck();
 					
 					window.location.href = "#attendeeHome";
 				}else{
-					$('#login_response').html("The details you entered did not match an account in our system");
+					$('#login_response').html(response.data.error);
 				}
 			}else{
 				$('#login_response').html("Unable to call API.  Error: "+response.error);
@@ -673,6 +697,13 @@ function afterLoginCheck(){
 	}else{
 		$('#standmanagerpagelink').hide();
 		$('#standmanagerbreak').hide();
+	}
+
+	allow_name_search = localStorage.getItem('allow_name_search');
+	if(allow_name_search==1){
+		$('#selectattendeecontent').show();
+	}else{
+		$('#selectattendeecontent').hide();
 	}
 		
 	if(parseInt(localStorage.getItem('security'))>=9){
@@ -875,7 +906,62 @@ function goToSaveNotes(noteid, eventid, loc){
 				window.location.href = '#regNotes'; 
 			}
 		}
-	});	
+	});
+}
+
+function goToViewReg(regid){
+	
+	$('#regidfulldets').val(regid);
+	
+	window.location.href = '#fullRegNotes'; 
+	
+}
+
+function getFullRegDetails(){
+	var noteid = $('#regidfulldets').val();
+	
+	$.ajax({
+		type: "POST",
+		data: {
+			"action": "getfullregistrationdetails",
+			"apikey": apikey,
+			"regid": noteid
+		},
+		url: apiURL,
+		dataType: 'json',
+		success: function(response) {
+			if(!response.success){
+				$('#standmanagerresponse').html(response.message);
+				$('#standmanagerresponse').show();
+				setTimeout(function(){
+					$('#standmanagerresponse').hide();
+				}, 3000);
+				window.location.href = "#standManagerPage";
+			}else{
+				//found etails, build the page
+				html = "Attendee name: "+response.data.first_name+" "+response.data.last_name;
+				html += "<br>Organisation: "+response.data.organisation;
+				html += "<br>Job Title: "+response.data.job_title;
+				html += "<br>Lead Quality: ";
+				switch(response.data.lead_quality){
+					case '1':
+						html += "Low";
+						break;
+					case '2':
+						html += "Medium";
+						break;
+					case '3':
+						html += "High";
+						break;
+					default:
+						html += "N/A";
+				}
+				html += "<br>Registered By: "+response.data.registered_by_name;
+				html += "<br>Notes:<br>"+response.data.notes;
+				$('#regdetails').html(html);
+			}
+		}
+	});
 }
 
 function goToViewAttendee(attendeeref){   
@@ -1005,6 +1091,7 @@ function getAllStandDetails(){
 					var html = "<h4>"+response.data.total+" attendees registered for " + $('#event_name').html() + "</h4>";
 					html += "<table id='recentregtable' class='tablesorter  tablesorter-bootstrap'>"
 					html += "<thead><tr>";
+					html += "<th>Organisation</th>";
 					html += "<th onclick='resortName();' class='tablesorterheader";
 					if(sorttype=='nameup'){
 						html += " headerSortUp";
@@ -1013,14 +1100,19 @@ function getAllStandDetails(){
 					}
 					html += "'>Name</th>";
 					
-					html += "<th>Quality</th><th>Notes</th><th>Time</th></tr></thead>";
+					html += "<th>Quality</th><th></th></tr></thead>";
 					html += "<tbody>\n";
 					for(var i = 0;i<response.data.registrations.length;i++){
+						organisation_name = response.data.registrations[i].organisation_name;
 						name = response.data.registrations[i].name;
+						id = response.data.registrations[i].id;
 						time = response.data.registrations[i].time;
 						notes = response.data.registrations[i].notes;
 						lead_quality = response.data.registrations[i].lead_quality;
 						html += "<tr>";
+							html += "<td>";
+								html += organisation_name;
+							html += "</td>";
 							html += "<td>";
 								html += name;
 							html += "</td>";
@@ -1030,7 +1122,7 @@ function getAllStandDetails(){
 										html += "Low";
 										break;
 									case '2':
-										html += "Mediaum";
+										html += "Medium";
 										break;
 									case '3':
 										html += "High";
@@ -1040,10 +1132,7 @@ function getAllStandDetails(){
 								}
 							html += "</td>";
 							html += "<td>";
-								html += notes;
-							html += "</td>";
-							html += "<td>";
-								html += time;
+								html += "<button class='ui-btn ui-shadow ui-corner-all' onclick='goToViewReg("+id+")'>Notes</button>";
 							html += "</td>";
 						html += "</tr>\n";
 					}
@@ -1055,18 +1144,14 @@ function getAllStandDetails(){
 					$('#standmanagerdetails').html(response.message);
 				}
 				
-				
-				
-				
-				
-				
-				
 			}
 		});
 	}else{
 		$('#standmanagerdetails').html("Currently there is no internet access so this list cannot be loaded.  Once access is restored, please refresh the page");
 	}
 }
+
+
 
 function dateWithoutSeconds(date){
 	return date.substring(0, date.length - 3);
@@ -1113,6 +1198,10 @@ $(document).on( "pagecontainerchange", function( event, ui ) {
 		case "standManagerPage":
 			checkIfLoggedIn(true);
 			getAllStandDetails();
+			break;
+		case "fullRegNotes":
+			checkIfLoggedIn(true);
+			getFullRegDetails();
 			break;
 		default:
 			console.log("NO PAGE INIT FUNCTION")
