@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.jmdb.bookmein2" version="2.1.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
+<widget id="com.jmdb.bookmein2" version="2.1.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:gap="http://phonegap.com/ns/1.0">
     <feature name="Camera">
         <param name="browser-package" value="Camera" />
     </feature>
@@ -17,9 +17,22 @@
 				James Rooney
     </author>
     <content src="index.html" />
+    <icon height="1024" src="www/res/icon/ios/BMI1024x1024.png" width="1024" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <config-file mode="replace" parent="NSCameraUsageDescription" platform="ios">
+        <string>The app will need access to the camera in order to scan barcodes.</string>
+    </config-file>
+    <config-file mode="replace" parent="NSPhotoLibraryUsageDescription" platform="ios">
+        <string>The app will need access to the photo library to scan any previously stored barcodes.</string>
+    </config-file>
+    <edit-config file="*-Info.plist" mode="merge" target="NSCameraUsageDescription">
+        <string>The app will need access to the camera in order to scan barcodes</string>
+    </edit-config>
+    <edit-config file="*-Info.plist" mode="merge" target="NSPhotoLibraryUsageDescription">
+        <string>The app will need access to the photo library to scan any previously stored barcodes</string>
+    </edit-config>
     <preference name="DisallowOverscroll" value="true" />
     <preference name="android-minSdkVersion" value="19" />
     <preference name="phonegap-version" value="cli-9.0.0" />

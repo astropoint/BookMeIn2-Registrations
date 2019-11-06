@@ -181,7 +181,7 @@
 				<button id="scanbutton" >Scan Barcode</button>
 
 				<div id="selectattendeecontent">
-					<div style="font-weight: bold;font-size:1.2em;">OR</div>
+					<div id='ordiv' style="font-weight: bold;font-size:1.2em;">OR</div>
 					<br>
 					<input class="wide-control" type="text" id="attendeesurname" placeholder="Type an attendee's name to search for them">
 					<br>
@@ -197,7 +197,7 @@
 				<div id="scanresponsetext"></div>
 
 				<br><br><br>
-				<button onclick="goToRecentRegList();">View all attendees registered</button>
+				<button onclick="goToRecentRegList();">View all attendees registered on this device</button>
 			</div>
 		</div>
 	</div>
@@ -241,6 +241,39 @@
 				<button onclick="saveNotes();">Save</button>
 				
 				<div id='regnotesresponse'></div>
+			</div>
+		</div>
+	</div> <!-- end regnotes -->
+	
+	<div data-role="page" class='mypage' id="fullRegNotes">
+		<div data-role="header">
+			<title>Registration Details</title>
+			<script id="panel-init">
+					$(function() {
+						$( "body>[data-role='panel']" ).panel();
+					});
+			</script>
+
+		</div>
+
+		<div role="main" class="ui-content">
+				<!-- banner content-->
+			<div class="banner">
+				<div class="menu_icon">
+					<a class='left' href="#leftpanel"><p class='hamburger_icon'>&#9776;</p></a> <!-- or &#8801 -->
+				</div>			
+			</div>	
+			<h3 class="logo center conference_name"></h3>
+			<a class="backbutton right" style="font-size:32px" href="javascript:history.back()">&#8592;</a>
+			
+			<div class='pagebody center'>
+				<input type='hidden' id='regidfulldets' />
+				<div id='regdetails'>
+				
+				</div>
+				<div>
+					<a href="#standManagerPage">View full list</a>
+				</div>
 			</div>
 		</div>
 	</div> <!-- end regnotes -->
@@ -409,6 +442,7 @@
 					No attendees found on stand
 				</div>
 				<div><a href='#' onclick='getAllStandDetails()'><i class="fa fa-refresh" aria-hidden="true"></i> Refresh page</a></div>
+				<div style='display:none;color:red' id='standmanagerresponse'></div>
 			</div>
 		</div>
 	</div>
