@@ -6,16 +6,23 @@ $(document).ready(function(){
 	checkMobile();
 	
 	numattendees = localStorage.getItem("numattendees");
-	console.log(numattendees);
 	if(numattendees===null){
 		numattendees = 0;
 		localStorage.setItem("numattendees", 0);
 	}
-	console.log(numattendees);
+	loggedin = localStorage.getItem("loggedin");
+	if(loggedin===null){
+		loggedin = 0;
+		localStorage.setItem("loggedin", 0);
+	}
 	
 	//check the status of the internet every 10 seconds
 	setInterval(function(){
-		checkInternet(tryUploads);
+		if(loggedin=='1'){
+			checkInternet(tryNormalUploads);
+		}else{
+			checkInternet(tryOldUploads);
+		}
 		
 		refreshcount++;
 	}, 10000);
@@ -303,7 +310,7 @@ function checkRegNotes(){
 		}else{
 			$('#quality').val('0');
 		}
-		$("input[type='radio']").checkboxradio("refresh");
+		$('#quality').selectmenu('refresh', true);
 		if(notes!==null){
 			$('#regnotestext').val(notes);
 		}
@@ -389,7 +396,7 @@ function saveNotes(){
 		$('#regnotes').val('');
 		$('#scanresponsetext').html(localStorage.getItem("attendee-"+regid+"-name")+" has been updated");
 		if(isInternet){
-			uploadNotes(regid, false);
+			uploadNotes(regid, false, false);
 		}
 		window.location.href = '#eventScan';
 		$('#selectattendeebysurnamebuttonnew').hide();
@@ -402,57 +409,75 @@ function saveNotes(){
 		getRecentlyRegistered(-1, 0);
 		$('#gotoscanbarcodes').show();
 		if(isInternet){
-			uploadNotes(regid, false);
+			uploadNotes(regid, false, false);
 		}
 		window.location.href='#eventRegs';
 	}
 
 }
 
+function tryNormalUploads(){
+	tryUploads(false);
+}
+
+function tryOldUploads(){
+	tryUploads(true);
+}
+
 var attemptinguploads = false;
-function tryUploads(){
-	console.log("Trying uploads "+attemptinguploads);
-	if(!attemptinguploads){
-		attemptinguploads = true;
-		var numattendees = localStorage.getItem("numattendees");
-		
-		for(var i = 0;i<numattendees;i++){
-			var uploaded = localStorage.getItem("attendee-"+i+"-uploaded");
-			if(uploaded=='0'){
-				uploadAttendee(i, true);
-				//if we upload, stop the function, and wait for it to be called again
-				return true;
+function tryUploads(useoldkey){
+	
+	if(isInternet){
+		if(!attemptinguploads){
+			attemptinguploads = true;
+			var numattendees = localStorage.getItem("numattendees");
+			
+			for(var i = 0;i<numattendees;i++){
+				var uploaded = localStorage.getItem("attendee-"+i+"-uploaded");
+				var deleted = localStorage.getItem("attendee-"+i+"-deleted");
+				if(uploaded=='0' && deleted=='0'){
+					uploadAttendee(i, true, useoldkey);
+					//if we upload, stop the function, and wait for it to be called again
+					return true;
+				}
 			}
-		}
-		
-		for(var i = 0;i<numattendees;i++){
-			var uploaded = localStorage.getItem("attendee-"+i+"-notesuploaded");
-			if(uploaded=='0'){
-				uploadNotes(i, true);
-				attemptinguploads = false;
-				//if we upload, stop the function, and wait for it to be called again
-				return true;
+			
+			for(var i = 0;i<numattendees;i++){
+				var uploaded = localStorage.getItem("attendee-"+i+"-notesuploaded");
+				var deleted = localStorage.getItem("attendee-"+i+"-deleted");
+				if(uploaded=='0'){
+					uploadNotes(i, true, useoldkey);
+					attemptinguploads = false;
+					//if we upload, stop the function, and wait for it to be called again
+					return true;
+				}
 			}
+			
+			attemptinguploads = false;
 		}
-		
-		attemptinguploads = false;
 	}
 }
 
-function uploadNotes(attendeenum, tryuploadsagain){
+function uploadNotes(attendeenum, tryuploadsagain, useoldkey){
 	
 	var regnotes = localStorage.getItem("attendee-"+attendeenum+"-notes");
 	var quality = localStorage.getItem("attendee-"+attendeenum+"-quality");
 	var barcode = localStorage.getItem("attendee-"+attendeenum+"-barcode");
 	var eventid = localStorage.getItem("attendee-"+attendeenum+"-eventid");
 	var notesstatus = localStorage.getItem("attendee-"+attendeenum+"-notesuploaded");
+	
+	var keytouse = apikey;
+	if(useoldkey){
+		keytouse = localStorage.getItem("oldkey");
+	}
+	
 	if(notesstatus==0){
 	
 		$.ajax({
 			type: "POST",
 			data: {
 				"action": "setnotesforlocation",
-				"apikey": apikey,
+				"apikey": keytouse,
 				"barcode": barcode,
 				"regnotes": regnotes,
 				"quality": quality,
@@ -465,7 +490,11 @@ function uploadNotes(attendeenum, tryuploadsagain){
 					localStorage.setItem("attendee-"+attendeenum+"-notesuploaded", '1');
 					if(tryuploadsagain){
 						attemptinguploads = false;
-						tryUploads();
+						if(useoldkey){
+							tryOldUploads();
+						}else{
+							tryNormalUploads();
+						}
 					}
 				}else{
 					attemptinguploads = false;
@@ -516,11 +545,12 @@ function registerAttendee( eventid, thisbarcode, type){
 		localStorage.setItem("attendee-"+thisattendeenum+"-quality", -1);
 		localStorage.setItem("attendee-"+thisattendeenum+"-notes", "");
 		localStorage.setItem("attendee-"+thisattendeenum+"-uploaded", '0');
+		localStorage.setItem("attendee-"+thisattendeenum+"-deleted", '0');
 		localStorage.setItem("attendee-"+thisattendeenum+"-notesuploaded", '0'); // until notes are saved, there's nothing to upload
 		localStorage.setItem("attendee-"+thisattendeenum+"-attendeeid", -1);
 		
 		if(isInternet){
-			uploadAttendee(thisattendeenum, false);
+			uploadAttendee(thisattendeenum, false, false);
 		}else{
 			if(splitbarcode.length==1 && isInternet){
 				//1 D barcode, and internet, look up the name as well
@@ -553,18 +583,22 @@ function registerAttendee( eventid, thisbarcode, type){
 	}
 }
 
-function uploadAttendee(attendeenum, tryuploadsagain){
+function uploadAttendee(attendeenum, tryuploadsagain, useoldkey){
 	var uuid = $('#uuid').val();
 	var hostaddress = $('#hostaddresshidden').val();
 
 	var eventid = localStorage.getItem("attendee-"+attendeenum+"-eventid");
 	var barcode = localStorage.getItem("attendee-"+attendeenum+"-barcode");
+	var keytouse = apikey;
+	if(useoldkey){
+		keytouse = localStorage.getItem("oldkey");
+	}
 	
 	$.ajax({
 		type: "POST",
 		data: {
 			"action": "registerattendee",
-			"apikey": apikey,
+			"apikey": keytouse,
 			"eventid": eventid,
 			"scandata": barcode
 		},
@@ -578,7 +612,15 @@ function uploadAttendee(attendeenum, tryuploadsagain){
 				localStorage.setItem("attendee-"+attendeenum+"-attendeeid", response.data.insertid);
 				if(tryuploadsagain){
 					attemptinguploads = false;
-					tryUploads();
+					if(useoldkey){
+						localStorage.setItem("attendee-"+attendeenum+"-deleted", '1');
+						tryOldUploads();
+					}else{
+						tryNormalUploads();
+					}
+				}
+				if(useoldkey){
+					//delete old record
 				}
 			}else{
 				attemptinguploads = false;
@@ -629,6 +671,8 @@ $(document).on('click',"#log_in_btn",function(e){
 		goodform = false;
 		errors.push("Unable to connect to API.  Please check your internet connection");
 		//showToast("Unable to connect to API.  Please check your internet connection");
+	}else{
+		tryOldUploads();
 	}
 	if(username==''){
 		goodform = false;
@@ -645,6 +689,24 @@ $(document).on('click',"#log_in_btn",function(e){
 	$('#login_response').html("");
 	
 	if(goodform){
+		numattendees = localStorage.getItem("numattendees");
+		for(var i = 0; i<numattendees;i++){
+			localStorage.setItem("attendee-"+i+"-eventid", '');
+			localStorage.setItem("attendee-"+i+"-barcode", '');
+			localStorage.setItem("attendee-"+i+"-name", '');
+			localStorage.setItem("attendee-"+i+"-organisation", '');
+			localStorage.setItem("attendee-"+i+"-job_title", '');
+			localStorage.setItem("attendee-"+i+"-quality", -1);
+			localStorage.setItem("attendee-"+i+"-notes", "");
+			localStorage.setItem("attendee-"+i+"-uploaded", '0');
+			localStorage.setItem("attendee-"+i+"-deleted", '1');
+			localStorage.setItem("attendee-"+i+"-notesuploaded", '0'); // until notes are saved, there's nothing to upload
+			localStorage.setItem("attendee-"+i+"-attendeeid", -1);
+		}
+		numattendees = 0;
+		localStorage.setItem("numattendees", 0);
+		$('#scanresponsetext').html('');
+		
 		data = "action=login&username="+username+"&eventref="+eventref+"&password="+password
 		$.ajax({
 			url: apiURL,
@@ -823,28 +885,31 @@ function getRecentlyRegistered(eventid, preregistered){
 	html += "<th>Upload<br>Status</th><th>&nbsp;</th></tr></thead>";
 	html += "<tbody>\n";
 	for(var i = 0;i<numattendees;i++){
-		name = localStorage.getItem('attendee-'+i+'-name');
-		barcode = localStorage.getItem('attendee-'+i+'-barcode');
-		if(barcode!==null){
-			if(name!=''){
-				name += " - "+barcode;
-			}else{
-				name = barcode;
+		var deleted = localStorage.getItem('attendee-'+i+'-deleted');
+		if(deleted=='0'){
+			name = localStorage.getItem('attendee-'+i+'-name');
+			barcode = localStorage.getItem('attendee-'+i+'-barcode');
+			if(barcode!==null){
+				if(name!=''){
+					name += " - "+barcode;
+				}else{
+					name = barcode;
+				}
+				
+				html += "<tr>";
+				html += "<td><br />";
+				html += name
+				html += "</td>";
+				html += "<td>";
+				if(localStorage.getItem('attendee-'+i+'-uploaded')=='1' && localStorage.getItem('attendee-'+i+'-notesuploaded')=='1'){
+					html += "Uploaded";
+				}else{
+					html += "Pending";
+				}
+				html += "</td>";
+				html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+i+", "+eventid+", 1)'>Notes</button></td>";
+				html += "</tr>\n";
 			}
-			
-			html += "<tr>";
-			html += "<td><br />";
-			html += name
-			html += "</td>";
-			html += "<td>";
-			if(localStorage.getItem('attendee-'+i+'-uploaded')=='1' && localStorage.getItem('attendee-'+i+'-notesuploaded')=='1'){
-				html += "Uploaded";
-			}else{
-				html += "Pending";
-			}
-			html += "</td>";
-			html += "<td><button class='ui-btn ui-shadow ui-corner-all' onclick='goToSaveNotes("+i+", "+eventid+", 1)'>Notes</button></td>";
-			html += "</tr>\n";
 		}
 	}
 	html += "</tbody></table>";
@@ -1252,6 +1317,9 @@ function toggle_content(current, alternative) {
 function resetAllFields(){
 	$('#login_response').html('');
 	$('.conference_name').html('');
+	
+	var oldkey = localStorage.getItem("apikey");
+	localStorage.setItem("oldkey", oldkey);
 	
 	
 	localStorage.setItem("loggedIn", 0);
