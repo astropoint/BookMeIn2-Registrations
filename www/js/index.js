@@ -48,7 +48,7 @@ function onDeviceReady(){
 		});
 }
 
-var siteURL = "https://reg.bookmein2.com";
+var siteURL = "https://dev.bookmein2.com";
 var apiURL = siteURL+"/api/checkinapi.php";
 var isInternet = true;
 var curconference = -1;
